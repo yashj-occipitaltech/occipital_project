@@ -10,11 +10,11 @@ class RecentOrdersScreen extends StatelessWidget {
       body: SingleChildScrollView(
           child: Column(
             children: <Widget>[
-              previousDataTiles('12345', 'Nasik,India'),
-              previousDataTiles('14567', 'Pune,India'),
-              previousDataTiles('98925', 'Assam,India'),
-              previousDataTiles('23390', 'Kerala,India'),
-              previousDataTiles('91403', 'Goa,India'),
+              previousDataTiles('12345', 'Nasik,India','Processing'),
+              previousDataTiles('14567', 'Pune,India','Uploaded'),
+              previousDataTiles('98925', 'Assam,India','Uploaded'),
+              previousDataTiles('23390', 'Kerala,India','Completed'),
+              previousDataTiles('91403', 'Goa,India','Completed'),
             ],
           ),
         ),
@@ -23,14 +23,10 @@ class RecentOrdersScreen extends StatelessWidget {
   }
 
  Widget locationTile(String location) {
-    return Container(
-      width: 120.0,
-      padding: EdgeInsets.all(10.0),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(45.0), color: Colors.grey[100]),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
+    return 
+       Row(
+         mainAxisAlignment: MainAxisAlignment.start,
+        // crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Icon(
             Icons.location_on,
@@ -38,11 +34,11 @@ class RecentOrdersScreen extends StatelessWidget {
           ),
           Text('$location')
         ],
-      ),
-    );
+      );
+    
   }
 
-  Widget previousDataTiles(String number, String location) {
+  Widget previousDataTiles(String number, String location,String status) {
     return InkWell(
       onTap: () {},
       child: Card(
@@ -50,42 +46,77 @@ class RecentOrdersScreen extends StatelessWidget {
         margin: EdgeInsets.all(10.0),
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(10.0))),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
+        child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Text(
-                        'Order No:',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 18.0),
-                      ),
-                      Text(
-                        ' $number',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18.0,
-                            color: Colors.orange),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 5.0,
-                  ),
-                  Text('26-09-19,10:10 A.M')
-                ],
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Text(
+                          'Order No:',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18.0),
+                        ),
+                        Text(
+                          ' $number',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.0,
+                              color: Colors.green[400]),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 5.0,
+                    ),
+                    Text('26-09-19,10:10 A.M'),
+                    SizedBox(height: 10.0,),
+                    locationTile(location)
+                  ],
+                ),
               ),
-              locationTile(location)
+
+              statusChip(status)
+              
             ],
           ),
-        ),
+        
+      ),
+    );
+  }
+
+
+
+   Color getColorForStatus(String status) {
+    switch (status) {
+      case 'Uploaded':
+        return Colors.yellow[700];
+        break;
+      case 'Completed':
+        return Colors.blue;
+        break;
+      case 'Processing':
+        return Colors.green[600];
+        
+        break;
+    }
+  }
+
+
+  Widget statusChip(String status){
+    return Container(
+      width: 100.0,
+      padding: EdgeInsets.all(10.0),
+      child: Text(status,textAlign: TextAlign.center,style: TextStyle(color: Colors.white),),
+      decoration: BoxDecoration(
+        color: getColorForStatus(status),
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(50.0),bottomLeft: Radius.circular(50.0))
       ),
     );
   }

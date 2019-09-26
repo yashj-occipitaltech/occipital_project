@@ -37,7 +37,7 @@ class _BottomNavigatorState extends State<BottomNavigator> {
         drawer: AppDrawer(),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: FloatingActionButton(
-          shape: _DiamondBorder(),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
           backgroundColor: Colors.orange[600],
           onPressed: () => Navigator.push(
             context,
@@ -53,7 +53,7 @@ class _BottomNavigatorState extends State<BottomNavigator> {
         bottomNavigationBar: BottomAppBar(
             clipBehavior: Clip.antiAlias,
             shape: CircularNotchedRectangle(),
-            notchMargin: 4.0,
+            notchMargin: 8.0,
             child: BottomNavigationBar(
               selectedItemColor: Colors.black54,
               currentIndex: _currentIndex,
@@ -108,9 +108,15 @@ class _DiamondBorder extends ShapeBorder {
   const _DiamondBorder();
 
   @override
+  ShapeBorder lerpFrom(ShapeBorder a ,double t){
+    return RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0));
+  }
+  @override
   EdgeInsetsGeometry get dimensions {
     return const EdgeInsets.only();
   }
+
+  
 
   @override
   Path getInnerPath(Rect rect, {TextDirection textDirection}) {
@@ -135,4 +141,6 @@ class _DiamondBorder extends ShapeBorder {
   ShapeBorder scale(double t) {
     return null;
   }
+
+ 
 }
