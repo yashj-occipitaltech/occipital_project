@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:occipital_tech/util/AppDrawer.dart';
 import 'package:occipital_tech/util/widgets.dart';
 
-class DemoVideoScreen extends StatelessWidget {
+
+class ContactScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //appBar: Widgets.appBar('Demo Video'),
-      body:  Center(child: Text('Demo video here')),
+      drawer: AppDrawer(),
+      appBar: Widgets.appBar('Contact Us'),
     );
-  
   }
 }

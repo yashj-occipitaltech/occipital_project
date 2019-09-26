@@ -5,7 +5,7 @@ class PreviousData extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: Widgets.appBar('Previous Data', false),
+      //appBar: Widgets.appBar('Previous Data'),
       body: Center(child: Text('Nothing hrere')),
     );
   }

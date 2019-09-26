@@ -6,7 +6,7 @@ class RecentOrdersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
-      appBar: Widgets.appBar('Home',true),
+     // appBar: Widgets.appBar('Home'),
       body: SingleChildScrollView(
           child: Column(
             children: <Widget>[

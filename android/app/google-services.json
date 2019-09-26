@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "549437573640",
+    "firebase_url": "https://tamatar-1b4ec.firebaseio.com",
+    "project_id": "tamatar",
+    "storage_bucket": "tamatar.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:549437573640:android:0fe26a81448a4748e79fbd",
+        "android_client_info": {
+          "package_name": "com.example.occipital_tech"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "549437573640-afampc261ivug2f55p778d89kj4gb5lg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.occipital_tech",
+            "certificate_hash": "e619c34f6dff85333bd019c9d1bf4c89856d8bfb"
+          }
+        },
+        {
+          "client_id": "549437573640-m9nmuhs4fufl1hncgtqomdng2oqdpl09.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAaMG3asTfLmFEc4Ohz0qTdwnMt2xIi_O8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "549437573640-m9nmuhs4fufl1hncgtqomdng2oqdpl09.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

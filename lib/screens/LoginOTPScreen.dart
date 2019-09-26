@@ -10,7 +10,7 @@ class LoginOTPScreen extends StatefulWidget {
 
 class _LoginOTPScreenState extends State<LoginOTPScreen> {
 
-  String phoneNo;    
+    String phoneNo;    
     String smsOTP;    
     String verificationId;    
     String errorMessage = '';    
@@ -76,7 +76,7 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
                         _auth.currentUser().then((user) {    
                         if (user != null) {    
                             Navigator.of(context).pop();    
-                            Navigator.of(context).pushReplacementNamed('/homepage');    
+                            Navigator.of(context).pushReplacementNamed('/home');    
                         } else {    
                             signIn();    
                         }    
@@ -94,11 +94,11 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
             verificationId: verificationId,    
             smsCode: smsOTP,    
             );    
-            final FirebaseUser user = await _auth.signInWithCredential(credential);    
+            final FirebaseUser user = (await _auth.signInWithCredential(credential)).user;    
             final FirebaseUser currentUser = await _auth.currentUser();    
             assert(user.uid == currentUser.uid);    
             Navigator.of(context).pop();    
-            Navigator.of(context).pushReplacementNamed('/');    
+            Navigator.of(context).pushReplacementNamed('/home');    
         } catch (e) {    
             handleError(e);    
         }    
@@ -126,22 +126,66 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
         }    
     }      
     
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-          body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            imageContainer(),
-            SizedBox(height: 15.0,),
-            labelText()
-          ],
-        ),
-      ),
-    );
-  }
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //         body: SingleChildScrollView(
+  //       child: Column(
+  //         mainAxisAlignment: MainAxisAlignment.start,
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: <Widget>[
+  //           imageContainer(),
+  //           SizedBox(height: 15.0,),
+  //           labelText()
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  @override    
+    Widget build(BuildContext context) {    
+        return Scaffold(    
+            appBar: AppBar(    
+            //title: Text(widget.title),    
+            ),    
+            body: Center(    
+            child: Column(    
+                mainAxisAlignment: MainAxisAlignment.center,    
+                children: <Widget>[    
+                Padding(    
+                    padding: EdgeInsets.all(10),    
+                    child: TextField(    
+                    decoration: InputDecoration(    
+                        hintText: 'Enter Phone Number Eg. +910000000000'),    
+                    onChanged: (value) {    
+                        this.phoneNo = value;    
+                    },    
+                    ),    
+                ),    
+                (errorMessage != ''    
+                    ? Text(    
+                        errorMessage,    
+                        style: TextStyle(color: Colors.red),    
+                        )    
+                    : Container()),    
+                SizedBox(    
+                    height: 10,    
+                ),    
+                RaisedButton(    
+                    onPressed: () {    
+                    verifyPhone();    
+                    },    
+                    child: Text('Verify'),    
+                    textColor: Colors.white,    
+                    elevation: 7,    
+                    color: Colors.blue,    
+                )    
+                ],    
+            ),    
+            ),    
+        );    
+    }   
 
 
 

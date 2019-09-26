@@ -3,27 +3,28 @@ import 'package:flutter/material.dart';
 
 
 class Widgets{
-  static Widget appBar(String title,bool showPopup){
-  final List<String> items = ["Account", "Logout"];
+  static Widget appBar(String title,){
     return AppBar(
+      
+      iconTheme:  IconThemeData(color: Colors.black),
       elevation: 0.0,
       title: Text(title,style: TextStyle(color: Colors.black),),
       centerTitle: true,
       backgroundColor: Colors.white,
-      actions: <Widget>[
-           showPopup ? PopupMenuButton(
-              icon: Icon(
-                Icons.account_box,
-                color: Colors.black,
-              ),
-              itemBuilder: (context) => items
-                  .map((data) => PopupMenuItem(
-                        child: Text(data),
-                        value: data,
-                      ))
-                  .toList(),
-            ):Container()
-          ],
+     
     );
   }
+
+
+   static Widget labelText(String label){
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            SizedBox(height: 10.0,),
+            Text(label,style: TextStyle(fontSize: 16.0),),
+            SizedBox(height: 10.0,)
+          ],
+        );
+      }
+
 }

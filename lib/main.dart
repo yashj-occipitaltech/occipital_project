@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:occipital_tech/screens/HomeScreen.dart';
+import 'package:occipital_tech/screens/BottomNavigator.dart';
 import 'package:occipital_tech/screens/LoginOTPScreen.dart';
+import 'package:occipital_tech/screens/SignUpScreen.dart';
 
 void main() => runApp(MyApp());
 
@@ -11,7 +12,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       routes: {
     // When navigating to the "/" route, build the FirstScreen widget.
-    '/': (context) => HomeScreen(),
+    '/home': (context) => BottomNavigator(),
     // When navigating to the "/second" route, build the SecondScreen widget.
     //'/second': (context) => SecondScreen(),
   },
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home:LoginOTPScreen(),
+      home:BottomNavigator(),
     );
   }
 }
