@@ -19,7 +19,7 @@ class _BottomNavigatorState extends State<BottomNavigator> {
   final List<String> items = ["Account", "Logout"];
 
   String appBarTitle = 'Home';
-  final List<Widget> _children = [PreviousData(), DemoVideoScreen()];
+  final List<Widget> _children = [PreviousData(''), DemoVideoScreen()];
   int _currentIndex = 0;
 
   setAppBarTitle(String title) {

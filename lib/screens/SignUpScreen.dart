@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
+import 'package:occipital_tech/models/store_user.dart';
+import 'package:occipital_tech/models/user_check.dart';
+import 'package:occipital_tech/util/ApiClient.dart';
 import 'package:occipital_tech/util/widgets.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -8,22 +13,25 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   int selectedUser = 1;
-  final _users= ['Farner','Trader','Enterprise'];
+  final _users = ['Farmer', 'Trader', 'Enterprise'];
   final _formKey = GlobalKey<FormState>();
+
+  final now = DateTime.now();
+
+  final _controllerOne = TextEditingController();
 
   setSelectedUser(int val) {
     setState(() {
       selectedUser = val;
-      _userType = _users[val-1];
+      _userType = _users[val - 1];
     });
   }
 
-
   String _username;
-  String _email;
-  String _companyId;
+  String _email = 'null';
+  String _companyId = 'null';
   String _phone;
-  String _userType ;
+  String _userType='Farmer';
   String _password;
 
   @override
@@ -60,6 +68,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Widget usernameInput() {
     return TextFormField(
+      controller: _controllerOne,
       validator: (value) {
         if (value.isEmpty) {
           return 'Please enter some text';
@@ -110,7 +119,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         }
         return null;
       },
-      onSaved: (String val){
+      onSaved: (String val) {
         _email = val;
       },
       decoration: InputDecoration(
@@ -128,7 +137,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         }
         return null;
       },
-       onSaved: (String val){
+      onSaved: (String val) {
         _companyId = val;
       },
       decoration: InputDecoration(
@@ -146,7 +155,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         }
         return null;
       },
-       onSaved: (String val){
+      onSaved: (String val) {
         _password = val;
       },
       obscureText: true,
@@ -185,16 +194,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'SUBMIT',
         style: TextStyle(fontSize: 16.0, color: Colors.white),
       ),
-      onPressed: () {
+      onPressed: () async {
         if (_formKey.currentState.validate()) {
+          _formKey.currentState.save();
+          print(_controllerOne.text);
           print('Done');
-          // Scaffold.of(context)
-          //     .showSnackBar(SnackBar(content: Text('Processing Data')));
+          print(StoreUserData(
+              DateFormat("dd-MM-yyyy").format(now),
+              DateFormat("H:m:s").format(now),
+              'userId',
+              _username,
+              _userType,
+              _companyId,
+              _email).toJson());
+
+          final response = await ApiClient.storeUser(StoreUserData(
+              DateFormat("dd-MM-yyyy").format(now),
+              DateFormat("H:m:s").format(now),
+              '9172396642',
+              _controllerOne.text,
+              _userType,
+              _companyId,
+              _email));
+
+          if (response.status == 'True') {
+            Navigator.pushReplacementNamed(context, '/home');
+          } else {
+            Fluttertoast.showToast(msg: 'Some error occured');
+          }
         }
       },
     );
   }
-
-
-
 }

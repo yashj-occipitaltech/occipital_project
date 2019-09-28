@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:occipital_tech/scoped_models/user_model.dart';
 import 'package:occipital_tech/screens/BottomNavigator.dart';
 import 'package:occipital_tech/screens/LoginOTPScreen.dart';
+import 'package:occipital_tech/screens/PreviousData.dart';
 import 'package:occipital_tech/screens/SignUpScreen.dart';
+import 'package:occipital_tech/util/locator.dart';
+import 'package:scoped_model/scoped_model.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  setupLocator();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -13,6 +20,8 @@ class MyApp extends StatelessWidget {
       routes: {
     // When navigating to the "/" route, build the FirstScreen widget.
     '/home': (context) => BottomNavigator(),
+    '/signup': (context) => SignUpScreen(),
+
     // When navigating to the "/second" route, build the SecondScreen widget.
     //'/second': (context) => SecondScreen(),
   },
@@ -29,7 +38,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home:BottomNavigator(),
+      home:BottomNavigator()
     );
   }
 }

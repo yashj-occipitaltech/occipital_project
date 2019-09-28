@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:occipital_tech/models/user_check.dart';
+import 'package:occipital_tech/util/ApiClient.dart';
 
 
 class LoginOTPScreen extends StatefulWidget {
@@ -15,6 +17,10 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
     String verificationId;    
     String errorMessage = '';    
     FirebaseAuth _auth = FirebaseAuth.instance;  
+
+    void dispose(){
+      super.dispose();
+    }
 
     Future<void> verifyPhone() async {    
         final PhoneCodeSent smsOTPSent = (String verId, [int forceCodeResend]) {    
@@ -72,21 +78,50 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
                 actions: <Widget>[    
                     FlatButton(    
                     child: Text('Done'),    
-                    onPressed: () {    
-                        _auth.currentUser().then((user) {    
-                        if (user != null) {    
-                            Navigator.of(context).pop();    
-                            Navigator.of(context).pushReplacementNamed('/home');    
+                    onPressed: () async {  
+
+                      final user = await _auth.currentUser();
+                      if (user != null){    
+                           // Navigator.of(context).pop();   
+                             final response = await ApiClient.checkUser(UserCheck(phoneNo.substring(3)));
+                           //   _showDialog();
+                             if(response.status =='False'){
+                               print('Verified user');
+                               Navigator.of(context).pushReplacementNamed('/home'); 
+                             }else{
+                               print('Not verified');
+                              // Navigator.of(context).pop();  
+                                 Navigator.of(context).pushNamed('/signup');  
+                             }
+                               
                         } else {    
                             signIn();    
                         }    
-                        });    
+                          
                     },    
                     )    
                 ],    
                 );    
         });    
-    }    
+    }   
+
+      _showDialog(){
+      return showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context){
+          return AlertDialog(
+            content: Row(
+              children: <Widget>[
+                CircularProgressIndicator(),
+                SizedBox(width: 5.0,),
+                Text('Verfiying user...')
+              ],
+            ),
+          );
+        }
+      );
+    } 
     
     signIn() async {    
         try {    

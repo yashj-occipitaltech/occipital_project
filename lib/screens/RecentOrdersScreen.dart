@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:occipital_tech/util/widgets.dart';
+
 
 
 class RecentOrdersScreen extends StatelessWidget {
@@ -42,7 +42,7 @@ class RecentOrdersScreen extends StatelessWidget {
     return InkWell(
       onTap: () {},
       child: Card(
-        elevation: 2.0,
+        elevation: 1.0,
         margin: EdgeInsets.all(10.0),
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(10.0))),
@@ -99,10 +99,10 @@ class RecentOrdersScreen extends StatelessWidget {
         return Colors.yellow[700];
         break;
       case 'Completed':
-        return Colors.blue;
+        return Colors.green[600];
         break;
       case 'Processing':
-        return Colors.green[600];
+        return Colors.orange[600];
         
         break;
     }
