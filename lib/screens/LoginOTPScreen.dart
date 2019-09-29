@@ -6,6 +6,7 @@ import 'package:occipital_tech/models/user_check.dart';
 import 'package:occipital_tech/scoped_models/user_model.dart';
 import 'package:occipital_tech/util/ApiClient.dart';
 import 'package:occipital_tech/util/locator.dart';
+import 'package:pin_code_text_field/pin_code_text_field.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class LoginOTPScreen extends StatefulWidget {
@@ -19,6 +20,7 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
   String verificationId;
   String errorMessage = '';
   FirebaseAuth _auth = FirebaseAuth.instance;
+  final _formKeyOTP = GlobalKey<FormState>();
 
   void dispose() {
     super.dispose();
@@ -60,50 +62,48 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
         barrierDismissible: false,
         builder: (BuildContext context) {
           return new AlertDialog(
-            title: Text('Enter SMS Code'),
-            content: Container(
-              height: 85,
-              child: Column(children: [
-                TextField(
-                  onChanged: (value) {
-                    this.smsOTP = value;
+            title: Text('Enter OTP'),
+            content: Column(mainAxisSize: MainAxisSize.min, children: [
+              // TextField(
+              //   onChanged: (value) {
+              //     this.smsOTP = value;
+              //   },
+              // ),
+              otpField(),
+
+              (errorMessage != ''
+                  ? Text(
+                      errorMessage,
+                      style: TextStyle(color: Colors.red),
+                    )
+                  : Container()),
+              SizedBox(
+                height: 10.0,
+              ),
+              Center(
+                child: RaisedButton(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0)),
+                  padding: EdgeInsets.all(16.0),
+                  child: model.state == ViewState.Busy
+                      ? CircularProgressIndicator()
+                      : Text(
+                          'Ok',
+                          style: TextStyle(fontSize: 16.0),
+                        ),
+                  onPressed: () async {
+                    final user = await _auth.currentUser();
+                    _onButtonPressed(user);
                   },
                 ),
-                (errorMessage != ''
-                    ? Text(
-                        errorMessage,
-                        style: TextStyle(color: Colors.red),
-                      )
-                    : Container())
-              ]),
-            ),
-            contentPadding: EdgeInsets.all(10),
-            actions: <Widget>[
-              FlatButton(
-                child: model.state== ViewState.Busy ? CircularProgressIndicator(): Text('Done'),
-                onPressed: () async {
-                  final user = await _auth.currentUser();
-                  _onButtonPressed(user);
-
-                  // if (user != null) {
-                  //   // Navigator.of(context).pop();
-                  //   final response = await ApiClient.checkUser(
-                  //       UserCheck(phoneNo.substring(3)));
-                  //   //   _showDialog();
-                  //   if (response.status == 'False') {
-                  //     print('Verified user');
-                  //     Navigator.of(context).pushReplacementNamed('/home');
-                  //   } else {
-                  //     print('Not verified');
-                  //     // Navigator.of(context).pop();
-                  //     Navigator.of(context).pushNamed('/signup');
-                  //   }
-                  // } else {
-                  //   signIn();
-                  // }
-                },
+              ),
+              SizedBox(
+                height: 10.0,
               )
-            ],
+            ]),
+            contentPadding: EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0)),
           );
         });
   }
@@ -111,17 +111,30 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
   _onButtonPressed(FirebaseUser user) async {
     final UserModel model = locator<UserModel>();
     final user = await _auth.currentUser();
-    if(user!=null){
+    if (user != null) {
       model.storePhoneNo(phoneNo.substring(3));
-      final response = await model.checkUser(UserCheck(phoneNo.substring(3)));  
-      if(response['success']=='True'){
+      final response = await model.checkUser(UserCheck(phoneNo.substring(3)));
+      if (response['success'] == 'True') {
         Navigator.pushNamed(context, '/signup');
-      }else{
+      } else {
         Navigator.pushReplacementNamed(context, '/home');
       }
-    }else{
+    } else {
       signIn();
     }
+  }
+
+  Widget otpField() {
+    return PinCodeTextField(
+      pinCodeTextFieldLayoutType: PinCodeTextFieldLayoutType.WRAP,
+      wrapAlignment: WrapAlignment.start,
+      pinBoxWidth: 25.0,
+      pinBoxDecoration: ProvidedPinBoxDecoration.underlinedPinBoxDecoration,
+      maxLength: 6,
+      onTextChanged: (value) {
+        this.smsOTP = value;
+      },
+    );
   }
 
   _showDialog() {
@@ -186,55 +199,60 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
   Widget build(BuildContext context) {
     return ScopedModelDescendant(
       builder: (context, chuild, UserModel model) => Scaffold(
-        body: ListView(
-          //padding: EdgeInsets.all(16.0),
-          children: <Widget>[
-            Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                imageContainer(),
-                SizedBox(
-                  height: 15.0,
-                ),
-                labelText(),
-                SizedBox(
-                  height: 10.0,
-                ),
-                inputField(),
-                SizedBox(
-                  height: 10.0,
-                ),
-                Text('We will send you one time password'),
-                Text('on your mobile number'),
-                SizedBox(
-                  height: 30.0,
-                ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: RawMaterialButton(
-                    onPressed: () {
-                      verifyPhone();
-                    },
-                    child: Icon(
-                      Icons.arrow_forward_ios,
-                      color: Colors.white,
-                      size: 25.0,
-                    ),
-                    shape: CircleBorder(),
-                    elevation: 2.0,
-                    fillColor: Colors.green,
-                    padding: EdgeInsets.all(15.0),
+        body: Form(
+          key: _formKeyOTP,
+          child: ListView(
+            //padding: EdgeInsets.all(16.0),
+            children: <Widget>[
+              Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  imageContainer(),
+                  SizedBox(
+                    height: 15.0,
                   ),
-                ),
-
-                SizedBox(
-                  height: 10.0,
-                )
-              ],
-            ),
-          ],
+                  labelText(),
+                  SizedBox(
+                    height: 10.0,
+                  ),
+                  inputField(),
+                  SizedBox(
+                    height: 10.0,
+                  ),
+                  Text('We will send you one time password'),
+                  Text('on your mobile number'),
+                  SizedBox(
+                    height: 30.0,
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: RawMaterialButton(
+                      onPressed: () {
+                        if (_formKeyOTP.currentState.validate()) {
+                          _formKeyOTP.currentState.save();
+                          verifyPhone();
+                        }
+                      },
+                      child: Icon(
+                        Icons.arrow_forward_ios,
+                        color: Colors.white,
+                        size: 25.0,
+                      ),
+                      shape: CircleBorder(),
+                      elevation: 2.0,
+                      fillColor: Colors.green,
+                      padding: EdgeInsets.all(15.0),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10.0,
+                  )
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -263,9 +281,27 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
   Widget inputField() {
     return Padding(
       padding: EdgeInsets.all(10),
-      child: TextField(
+      child: TextFormField(
+        validator: (String val) {
+          if (val.isEmpty) {
+            return 'Please enter your number';
+          }
+          if (val.length < 10) {
+            return 'Please enter a valid phone number';
+          }
+          return null;
+        },
+        onSaved: (value) {
+          this.phoneNo = '+91$value';
+        },
+        keyboardType: TextInputType.number,
+        inputFormatters: <TextInputFormatter>[
+          WhitelistingTextInputFormatter.digitsOnly,
+          LengthLimitingTextInputFormatter(10)
+        ],
+        maxLength: 10,
         decoration: InputDecoration(
-           
+            counterText: '',
             hintText: 'Your mobile number',
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(30.0)),

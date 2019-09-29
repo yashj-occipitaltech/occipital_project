@@ -121,7 +121,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return TextFormField(
       validator: (value) {
         if (value.isEmpty) {
-          return 'Please enter valid email';
+          return 'Please enter email here';
+        }
+
+        if (!RegExp(
+                r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+            .hasMatch(value)) {
+          return 'Please enter validate email ';
         }
         return null;
       },
@@ -206,12 +212,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
         color: Colors.green[400],
         padding: EdgeInsets.all(16.0),
         child: model.isLoading
-            ? CircularProgressIndicator( valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
+            ? CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
             : Text(
                 'SUBMIT',
                 style: TextStyle(fontSize: 16.0, color: Colors.white),
               ),
-        onPressed:() => model.isLoading ? null :_userType=='Farmer' ? _savedata(model):_verifyingTrader(model));
+        onPressed: () => model.isLoading
+            ? null
+            : _userType == 'Farmer'
+                ? _savedata(model)
+                : _verifyingTrader(model));
   }
 
   _savedata(UserModel model) async {
@@ -236,16 +247,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  
-
-
-  _verifyingTrader(UserModel model)async{
-    if(_formKey.currentState.validate()){
+  _verifyingTrader(UserModel model) async {
+    if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
-      final data = await model.verifyTrader(VerifyTrader(_companyId, _password));
-      if(data['error']==true && data['verified']==false){
+      final data =
+          await model.verifyTrader(VerifyTrader(_companyId, _password));
+      if (data['error'] == true && data['verified'] == false) {
         Fluttertoast.showToast(msg: data['status']);
-      }else if(data['error']==false && data['verified']==true){
+      } else if (data['error'] == false && data['verified'] == true) {
         _savedata(model);
       }
       print(data['error']);

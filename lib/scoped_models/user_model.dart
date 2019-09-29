@@ -73,7 +73,6 @@ class UserModel extends Model {
     bool hasError = true;
     final response = await ApiClient.verifyTrader(data);
 
-    print(response.toJson());
     if (response.resultCode == ResultCodes.successCode &&
         response.status == 'Success') {
       isVerified = true;    
@@ -98,22 +97,13 @@ class UserModel extends Model {
         accessToken: token,
       );
       _userSubject.add(true);
-      print('--->');
-      print(_authenticatedUser.accessToken);
       notifyListeners();
     } else {
-      print('I wad also here');
-      // FirebaseUser user = await FirebaseAuth.instance.currentUser();
-      // if (user != null) {
-      //   _authenticatedUser = User(firebaseUser: user);
-      //   _userSubject.add(true);
-      //   notifyListeners();
-      // } else {
+    
       _authenticatedUser = null;
       _userSubject.add(false);
       notifyListeners();
-      //   notifyListeners();
-      // }
+     
     }
 
     _setState(ViewState.Retrieved);
