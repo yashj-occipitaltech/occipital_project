@@ -37,7 +37,6 @@ class _BottomNavigatorState extends State<BottomNavigator> {
         drawer: AppDrawer(),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: FloatingActionButton(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
           backgroundColor: Colors.orange[600],
           onPressed: () => Navigator.push(
             context,

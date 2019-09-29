@@ -3,8 +3,12 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:occipital_tech/models/store_user.dart';
 import 'package:occipital_tech/models/user_check.dart';
+import 'package:occipital_tech/models/verify_trader.dart';
+import 'package:occipital_tech/scoped_models/user_model.dart';
 import 'package:occipital_tech/util/ApiClient.dart';
 import 'package:occipital_tech/util/widgets.dart';
+import 'package:scoped_model/scoped_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -31,34 +35,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String _email = 'null';
   String _companyId = 'null';
   String _phone;
-  String _userType='Farmer';
+  String _userType = 'Farmer';
   String _password;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: Widgets.appBar('Sign Up'),
-      resizeToAvoidBottomInset: true,
-      bottomNavigationBar: submitButton(context),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Widgets.labelText('User Name'),
-                usernameInput(),
-                SizedBox(
-                  height: 10.0,
-                ),
-                Widgets.labelText('Type of User'),
-                userOptions(),
-                selectedUser == 2 || selectedUser == 3
-                    ? showOtherInputs()
-                    : Container()
-              ],
+    return ScopedModelDescendant(
+      builder: (context, child, UserModel model) => Scaffold(
+        appBar: Widgets.appBar('Sign Up'),
+        resizeToAvoidBottomInset: true,
+        bottomNavigationBar: submitButton(context, model),
+        body: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Widgets.labelText('User Name'),
+                  usernameInput(),
+                  SizedBox(
+                    height: 10.0,
+                  ),
+                  Widgets.labelText('Type of User'),
+                  userOptions(),
+                  selectedUser == 2 || selectedUser == 3
+                      ? showOtherInputs()
+                      : Container()
+                ],
+              ),
             ),
           ),
         ),
@@ -122,6 +128,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       onSaved: (String val) {
         _email = val;
       },
+      onChanged: (String val) {
+        _email = val;
+      },
       decoration: InputDecoration(
           hintText: 'abc@gmail.com',
           border: OutlineInputBorder(),
@@ -140,6 +149,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       onSaved: (String val) {
         _companyId = val;
       },
+      onChanged: (String val) {
+        _companyId = val;
+      },
       decoration: InputDecoration(
           hintText: 'ABC12345',
           border: OutlineInputBorder(),
@@ -156,6 +168,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         return null;
       },
       onSaved: (String val) {
+        _password = val;
+      },
+      onChanged: (String val) {
         _password = val;
       },
       obscureText: true,
@@ -186,44 +201,56 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  Widget submitButton(BuildContext context) {
+  Widget submitButton(BuildContext context, UserModel model) {
     return RaisedButton(
-      color: Colors.green[400],
-      padding: EdgeInsets.all(16.0),
-      child: Text(
-        'SUBMIT',
-        style: TextStyle(fontSize: 16.0, color: Colors.white),
-      ),
-      onPressed: () async {
-        if (_formKey.currentState.validate()) {
-          _formKey.currentState.save();
-          print(_controllerOne.text);
-          print('Done');
-          print(StoreUserData(
-              DateFormat("dd-MM-yyyy").format(now),
-              DateFormat("H:m:s").format(now),
-              'userId',
-              _username,
-              _userType,
-              _companyId,
-              _email).toJson());
+        color: Colors.green[400],
+        padding: EdgeInsets.all(16.0),
+        child: model.isLoading
+            ? CircularProgressIndicator( valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
+            : Text(
+                'SUBMIT',
+                style: TextStyle(fontSize: 16.0, color: Colors.white),
+              ),
+        onPressed:() => model.isLoading ? null :_userType=='Farmer' ? _savedata(model):_verifyingTrader(model));
+  }
 
-          final response = await ApiClient.storeUser(StoreUserData(
-              DateFormat("dd-MM-yyyy").format(now),
-              DateFormat("H:m:s").format(now),
-              '9172396642',
-              _controllerOne.text,
-              _userType,
-              _companyId,
-              _email));
+  _savedata(UserModel model) async {
+    if (_formKey.currentState.validate()) {
+      _formKey.currentState.save();
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final data = await model.storeUser(StoreUserData(
+          DateFormat("dd-MM-yyyy").format(now),
+          DateFormat("H:m:s").format(now),
+          prefs.getString('phoneNo'),
+          _controllerOne.text,
+          _userType,
+          _companyId,
+          _email));
 
-          if (response.status == 'True') {
-            Navigator.pushReplacementNamed(context, '/home');
-          } else {
-            Fluttertoast.showToast(msg: 'Some error occured');
-          }
-        }
-      },
-    );
+      if (data['success'] == true && data['message'] == 'True') {
+        Fluttertoast.showToast(msg: 'Successful');
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        Fluttertoast.showToast(msg: data['message']);
+      }
+    }
+  }
+
+  
+
+
+  _verifyingTrader(UserModel model)async{
+    if(_formKey.currentState.validate()){
+      _formKey.currentState.save();
+      final data = await model.verifyTrader(VerifyTrader(_companyId, _password));
+      if(data['error']==true && data['verified']==false){
+        Fluttertoast.showToast(msg: data['status']);
+      }else if(data['error']==false && data['verified']==true){
+        _savedata(model);
+      }
+      print(data['error']);
+      print(data['verified']);
+      print(data['status']);
+    }
   }
 }

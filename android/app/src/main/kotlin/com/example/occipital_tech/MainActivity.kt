@@ -1,4 +1,4 @@
-package com.example.occipital_tech
+package com.occipitaltech.agrograde
 
 import android.os.Bundle
 

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:occipital_tech/scoped_models/user_model.dart';
 import 'package:occipital_tech/screens/BottomNavigator.dart';
 import 'package:occipital_tech/screens/ContactScreen.dart';
 import 'package:occipital_tech/screens/HelpScreen.dart';
 import 'package:occipital_tech/screens/SettingsScreen.dart';
+import 'package:occipital_tech/util/locator.dart';
 
 class AppDrawer extends StatefulWidget {
   @override
@@ -79,7 +82,11 @@ class _AppDrawerState extends State<AppDrawer> {
             actions: <Widget>[
               FlatButton(
                 child: Text('Yes'),
-                onPressed: () {},
+                onPressed: () {
+                  locator<UserModel>().logout();
+                  Fluttertoast.showToast(msg: 'Successfully logged out',);
+                  Navigator.pushReplacementNamed(context, '/loginotp');
+                },
               ),
               FlatButton(
                 child: Text('No'),

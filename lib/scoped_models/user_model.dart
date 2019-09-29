@@ -25,7 +25,7 @@ class UserModel extends Model {
   ViewState get state => _state;
 
 //Functions for login functionality
-  void checkUser(UserCheck user) async {
+  Future<Map<String, dynamic>> checkUser(UserCheck user) async {
     _setState(ViewState.Busy);
     isLoading = true;
     final response = await ApiClient.checkUser(user);
@@ -36,6 +36,8 @@ class UserModel extends Model {
     }
     isLoading = false;
     _setState(ViewState.Retrieved);
+
+    return {"success": response.status};
   }
 
   Future<Map<String, dynamic>> storeUser(StoreUserData userData) async {
@@ -67,30 +69,68 @@ class UserModel extends Model {
   Future<Map<String, dynamic>> verifyTrader(VerifyTrader data) async {
     _setState(ViewState.Busy);
     isLoading = true;
-    bool isVerified = true;
+    bool isVerified = false;
     bool hasError = true;
     final response = await ApiClient.verifyTrader(data);
 
+    print(response.toJson());
     if (response.resultCode == ResultCodes.successCode &&
         response.status == 'Success') {
+      isVerified = true;    
       hasError = false;
     } else {
+      isVerified = false;
       hasError = true;
     }
 
     _setState(ViewState.Retrieved);
     isLoading = false;
 
-    return {'verified': !isVerified, 'success': !hasError};
+    return {'verified': isVerified, 'error': hasError,'status':response.status};
+  }
+
+  void autoLogin() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String token = prefs.getString('token');
+    if (token != null) {
+     
+      _authenticatedUser = User(
+        accessToken: token,
+      );
+      _userSubject.add(true);
+      print('--->');
+      print(_authenticatedUser.accessToken);
+      notifyListeners();
+    } else {
+      print('I wad also here');
+      // FirebaseUser user = await FirebaseAuth.instance.currentUser();
+      // if (user != null) {
+      //   _authenticatedUser = User(firebaseUser: user);
+      //   _userSubject.add(true);
+      //   notifyListeners();
+      // } else {
+      _authenticatedUser = null;
+      _userSubject.add(false);
+      notifyListeners();
+      //   notifyListeners();
+      // }
+    }
+
+    _setState(ViewState.Retrieved);
   }
 
   void _savePrefs(User user) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     prefs.setString('userType', user.userType);
-    prefs.setString('phoneNo', user.phoneNo);
+    //prefs.setString('phoneNo', user.phoneNo);
     prefs.setString('token', user.accessToken);
     prefs.setString('userName', user.userName);
+  }
+
+  void storePhoneNo(String phoneNo) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('phoneNo', phoneNo);
   }
 
   void _deletePrefs() async {
@@ -101,6 +141,13 @@ class UserModel extends Model {
     prefs.setString('phoneNo', null);
     prefs.setString('token', null);
     prefs.setString('userName', null);
+  }
+
+  void logout()async{
+    _deletePrefs();
+    _authenticatedUser = null;
+    _userSubject.add(false);
+    notifyListeners();
   }
 
   void _setState(ViewState newState) {
