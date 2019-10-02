@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:occipital_tech/enums/view_state.dart';
 import 'package:occipital_tech/models/user_check.dart';
 import 'package:occipital_tech/scoped_models/user_model.dart';
@@ -16,9 +17,10 @@ class LoginOTPScreen extends StatefulWidget {
 
 class _LoginOTPScreenState extends State<LoginOTPScreen> {
   String phoneNo;
-  String smsOTP;
+  String smsOTP='';
   String verificationId;
   String errorMessage = '';
+  bool hasError = false;
   FirebaseAuth _auth = FirebaseAuth.instance;
   final _formKeyOTP = GlobalKey<FormState>();
 
@@ -37,12 +39,9 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
       await _auth.verifyPhoneNumber(
           phoneNumber: this.phoneNo, // PHONE NUMBER TO SEND OTP
           codeAutoRetrievalTimeout: (String verId) {
-            //Starts the phone number verification process for the given phone number.
-            //Either sends an SMS with a 6 digit code to the phone number specified, or sign's the user in and [verificationCompleted] is called.
             this.verificationId = verId;
           },
-          codeSent:
-              smsOTPSent, // WHEN CODE SENT THEN WE OPEN DIALOG TO ENTER OTP.
+          codeSent: smsOTPSent,
           timeout: const Duration(seconds: 20),
           verificationCompleted: (AuthCredential phoneAuthCredential) {
             print(phoneAuthCredential);
@@ -53,107 +52,6 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
     } catch (e) {
       handleError(e);
     }
-  }
-
-  Future<bool> smsOTPDialog(BuildContext context) {
-    final UserModel model = locator<UserModel>();
-    return showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return new AlertDialog(
-            title: Text('Enter OTP'),
-            content: Column(mainAxisSize: MainAxisSize.min, children: [
-              // TextField(
-              //   onChanged: (value) {
-              //     this.smsOTP = value;
-              //   },
-              // ),
-              otpField(),
-
-              (errorMessage != ''
-                  ? Text(
-                      errorMessage,
-                      style: TextStyle(color: Colors.red),
-                    )
-                  : Container()),
-              SizedBox(
-                height: 10.0,
-              ),
-              Center(
-                child: RaisedButton(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0)),
-                  padding: EdgeInsets.all(16.0),
-                  child: model.state == ViewState.Busy
-                      ? CircularProgressIndicator()
-                      : Text(
-                          'Ok',
-                          style: TextStyle(fontSize: 16.0),
-                        ),
-                  onPressed: () async {
-                    final user = await _auth.currentUser();
-                    _onButtonPressed(user);
-                  },
-                ),
-              ),
-              SizedBox(
-                height: 10.0,
-              )
-            ]),
-            contentPadding: EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0)),
-          );
-        });
-  }
-
-  _onButtonPressed(FirebaseUser user) async {
-    final UserModel model = locator<UserModel>();
-    final user = await _auth.currentUser();
-    if (user != null) {
-      model.storePhoneNo(phoneNo.substring(3));
-      final response = await model.checkUser(UserCheck(phoneNo.substring(3)));
-      if (response['success'] == 'True') {
-        Navigator.pushNamed(context, '/signup');
-      } else {
-        Navigator.pushReplacementNamed(context, '/home');
-      }
-    } else {
-      signIn();
-    }
-  }
-
-  Widget otpField() {
-    return PinCodeTextField(
-      pinCodeTextFieldLayoutType: PinCodeTextFieldLayoutType.WRAP,
-      wrapAlignment: WrapAlignment.start,
-      pinBoxWidth: 25.0,
-      pinBoxDecoration: ProvidedPinBoxDecoration.underlinedPinBoxDecoration,
-      maxLength: 6,
-      onTextChanged: (value) {
-        this.smsOTP = value;
-      },
-    );
-  }
-
-  _showDialog() {
-    return showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            content: Row(
-              children: <Widget>[
-                CircularProgressIndicator(),
-                SizedBox(
-                  width: 5.0,
-                ),
-                Text('Verfiying user...')
-              ],
-            ),
-          );
-        });
   }
 
   signIn() async {
@@ -202,58 +100,135 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
         body: Form(
           key: _formKeyOTP,
           child: ListView(
-            //padding: EdgeInsets.all(16.0),
-            children: <Widget>[
-              Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  imageContainer(),
-                  SizedBox(
-                    height: 15.0,
-                  ),
-                  labelText(),
-                  SizedBox(
-                    height: 10.0,
-                  ),
-                  inputField(),
-                  SizedBox(
-                    height: 10.0,
-                  ),
-                  Text('We will send you one time password'),
-                  Text('on your mobile number'),
-                  SizedBox(
-                    height: 30.0,
-                  ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: RawMaterialButton(
-                      onPressed: () {
-                        if (_formKeyOTP.currentState.validate()) {
-                          _formKeyOTP.currentState.save();
-                          verifyPhone();
-                        }
-                      },
-                      child: Icon(
-                        Icons.arrow_forward_ios,
-                        color: Colors.white,
-                        size: 25.0,
-                      ),
-                      shape: CircleBorder(),
-                      elevation: 2.0,
-                      fillColor: Colors.green,
-                      padding: EdgeInsets.all(15.0),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 10.0,
-                  )
-                ],
-              ),
-            ],
+            children: <Widget>[loginView()],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget loginView() {
+    return Column(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        imageContainer(),
+        SizedBox(
+          height: 15.0,
+        ),
+        labelText(),
+        SizedBox(
+          height: 10.0,
+        ),
+        inputField(),
+        SizedBox(
+          height: 10.0,
+        ),
+        Text('We will send you one time password'),
+        Text('on your mobile number'),
+        SizedBox(
+          height: 30.0,
+        ),
+        submitButton(),
+        SizedBox(
+          height: 10.0,
+        )
+      ],
+    );
+  }
+
+  Future<bool> smsOTPDialog(BuildContext context) {
+    final UserModel model = locator<UserModel>();
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Enter OTP'),
+            content: Column(mainAxisSize: MainAxisSize.min, children: [
+              otpField(),
+              Visibility(
+                child: Text(
+                  "Wrong PIN!",
+                  style: TextStyle(color: Colors.red),
+                ),
+                visible: hasError,
+              ),
+              
+              SizedBox(
+                height: 10.0,
+              ),
+              Center(
+                child: RaisedButton(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0)),
+                  padding: EdgeInsets.all(16.0),
+                  child: model.state == ViewState.Busy
+                      ? CircularProgressIndicator()
+                      : Text(
+                          'Ok',
+                          style: TextStyle(fontSize: 16.0),
+                        ),
+                  onPressed: () async {
+                    final user = await _auth.currentUser();
+                     if(smsOTP.isEmpty || smsOTP.length<6){
+                       Fluttertoast.showToast(msg: 'Please enter the OTP');
+                       setState(() {
+                         hasError = true;
+                       });
+                     } else{
+                        _onButtonPressed(user);
+                     }
+                   
+                  },
+                ),
+              ),
+              SizedBox(
+                height: 10.0,
+              )
+            ]),
+            contentPadding: EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0)),
+          );
+        });
+  }
+
+  Widget otpField() {
+    return PinCodeTextField(
+      autofocus: true,
+      hasError: hasError,
+      pinCodeTextFieldLayoutType: PinCodeTextFieldLayoutType.WRAP,
+      wrapAlignment: WrapAlignment.start,
+      pinBoxWidth: 25.0,
+      pinBoxDecoration: ProvidedPinBoxDecoration.underlinedPinBoxDecoration,
+      maxLength: 6,
+      onTextChanged: (value) {
+        this.smsOTP = value;
+      },
+    );
+  }
+
+  Widget submitButton() {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: RawMaterialButton(
+        onPressed: () {
+          if (_formKeyOTP.currentState.validate()) {
+            _formKeyOTP.currentState.save();
+            verifyPhone();
+          }
+        },
+        child: Icon(
+          Icons.arrow_forward_ios,
+          color: Colors.white,
+          size: 25.0,
+        ),
+        shape: CircleBorder(),
+        elevation: 2.0,
+        fillColor: Colors.green,
+        padding: EdgeInsets.all(15.0),
       ),
     );
   }
@@ -294,6 +269,9 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
         onSaved: (value) {
           this.phoneNo = '+91$value';
         },
+        autofocus: true,
+        autocorrect: false,
+        
         keyboardType: TextInputType.number,
         inputFormatters: <TextInputFormatter>[
           WhitelistingTextInputFormatter.digitsOnly,
@@ -311,5 +289,25 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
         },
       ),
     );
+  }
+
+  _onButtonPressed(FirebaseUser user) async {
+    final UserModel model = locator<UserModel>();
+    final user = await _auth.currentUser();
+    if (user != null) {
+      model.storePhoneNo(phoneNo.substring(3));
+      final response = await model.checkUser(UserCheck(phoneNo.substring(3)));
+      if (response['success'] == 'True') {
+        Navigator.pushNamed(context, '/signup');
+      } 
+      else if(response['success']=='Error' || response['resultCode']==2 || response['resultCode']==20 ){
+        Fluttertoast.showToast(msg: 'Some error occured.Please try again');
+      }
+      else  {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    } else {
+      signIn();
+    }
   }
 }

@@ -29,15 +29,23 @@ class UserModel extends Model {
     _setState(ViewState.Busy);
     isLoading = true;
     final response = await ApiClient.checkUser(user);
-    if (response.resultCode == ResultCodes.successCode) {
-      _userExists.add(true);
+    print(response.toJson());
+    if (response.resultCode == ResultCodes.successCode && response.token!=null) {
+    //  _userExists.add(true);
+      _authenticatedUser = User(
+        accessToken: response.token,
+      );
+       _savePrefs(_authenticatedUser);
+      _userSubject.add(true);
+      notifyListeners();
     } else {
-      _userExists.add(false);
+       _userSubject.add(false);
+       notifyListeners();
     }
     isLoading = false;
     _setState(ViewState.Retrieved);
 
-    return {"success": response.status};
+    return {"success": response.status, "resultCode": response.resultCode};
   }
 
   Future<Map<String, dynamic>> storeUser(StoreUserData userData) async {
@@ -75,7 +83,7 @@ class UserModel extends Model {
 
     if (response.resultCode == ResultCodes.successCode &&
         response.status == 'Success') {
-      isVerified = true;    
+      isVerified = true;
       hasError = false;
     } else {
       isVerified = false;
@@ -85,25 +93,28 @@ class UserModel extends Model {
     _setState(ViewState.Retrieved);
     isLoading = false;
 
-    return {'verified': isVerified, 'error': hasError,'status':response.status};
+    return {
+      'verified': isVerified,
+      'error': hasError,
+      'status': response.status
+    };
   }
 
   void autoLogin() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String token = prefs.getString('token');
+    print('token here');
+    print(token);
     if (token != null) {
-     
       _authenticatedUser = User(
         accessToken: token,
       );
       _userSubject.add(true);
       notifyListeners();
-    } else {
-    
+    } else if (token == null) {
       _authenticatedUser = null;
-      _userSubject.add(false);
+      _userSubject.add(false); 
       notifyListeners();
-     
     }
 
     _setState(ViewState.Retrieved);
@@ -133,7 +144,7 @@ class UserModel extends Model {
     prefs.setString('userName', null);
   }
 
-  void logout()async{
+  void logout() async {
     _deletePrefs();
     _authenticatedUser = null;
     _userSubject.add(false);
