@@ -15,38 +15,48 @@ class AppDrawer extends StatefulWidget {
 class _AppDrawerState extends State<AppDrawer> {
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          DrawerHeader(
-            child: Center(child: Text('Agrograde')),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.green,
-            ),
-          ),
-          drawerTiles('Home', BottomNavigator(), Icons.home),
-          drawerTiles('Settings', SettingsScreen(), Icons.settings),
-          drawerTiles('Help', HelpScreen(), Icons.help),
-          drawerTiles('Contact us', ContactScreen(), Icons.contact_phone),
-          ListTile(
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Icon(Icons.account_circle),
-                  SizedBox(
-                    width: 10.0,
-                  ),
-                  Text('Logout')
-                ],
-              ),
-              onTap: ()  {
-                Navigator.pop(context);
-                _showDialog();
+    return SafeArea(
+      child: Drawer(
+        
+        child: Container(
+          color: Colors.white,
+          child: ListView(
+
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              Container(
                 
-                }),
-        ],
+                height: MediaQuery.of(context).size.height * 0.3,
+                //padding: EdgeInsets.all(5.0),
+              //child: Container(),
+                decoration: BoxDecoration(
+                  //border:Border.all() ,
+                  image: DecorationImage(image: ExactAssetImage('assets/home_logo.png'),fit: BoxFit.fitWidth)
+                ),
+              ),
+              drawerTiles('Home', BottomNavigator(), Icons.home),
+              drawerTiles('Settings', SettingsScreen(), Icons.settings),
+              drawerTiles('Help', HelpScreen(), Icons.help),
+              drawerTiles('Contact us', ContactScreen(), Icons.contact_phone),
+              ListTile(
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Icon(Icons.account_circle),
+                      SizedBox(
+                        width: 10.0,
+                      ),
+                      Text('Logout')
+                    ],
+                  ),
+                  onTap: ()  {
+                    Navigator.pop(context);
+                    _showDialog();
+                    
+                    }),
+            ],
+          ),
+        ),
       ),
     );
   }

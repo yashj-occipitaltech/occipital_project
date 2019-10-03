@@ -253,7 +253,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       final data =
           await model.verifyTrader(VerifyTrader(_companyId, _password));
       if (data['error'] == true && data['verified'] == false) {
-        Fluttertoast.showToast(msg: data['status']);
+        print('ERrro');
+      //  Fluttertoast.showToast(msg: data['status']);
       } else if (data['error'] == false && data['verified'] == true) {
         _savedata(model);
       }

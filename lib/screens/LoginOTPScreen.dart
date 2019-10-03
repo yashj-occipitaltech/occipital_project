@@ -236,12 +236,10 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
   Widget imageContainer() {
     return Container(
       width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height * 0.55,
+      height: MediaQuery.of(context).size.height * 0.6,
       decoration: BoxDecoration(
-          color: Colors.green,
-          borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(100.0),
-              bottomRight: Radius.circular(100.0))),
+          image: DecorationImage(image: ExactAssetImage('assets/login_screen.png'),fit: BoxFit.fitHeight),
+          ),
     );
   }
 

@@ -17,6 +17,21 @@ class _PreviousDataState extends State<PreviousData> {
   String _defaultMonth = "January";
   String _defaultYear = "2019";
 
+  Map<String,String> mappedVAL = {
+    "January":"1",
+    "February":"2",
+    "March":"3",
+    "April":"4",
+    "May":"5",
+    "June":"6",
+    "July":"7",
+    "August":"8",
+    "September":"9",
+    "October":"10",
+    "November":"11",
+    "December":"12"
+  };
+
   List<String> months = [
     "January",
     "February",
@@ -47,9 +62,14 @@ class _PreviousDataState extends State<PreviousData> {
 
   _getOrders() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final data = await ApiClient.getOrderIds(GetOrderId(
+    print(GetOrderId(
         prefs.getString('phoneNo'),
-        _defaultMonth,
+        mappedVAL[_defaultMonth],
+        prefs.getString('token'),
+        _defaultYear).toJson());
+    final data = await ApiClient.getOrderIds(GetOrderId(
+        "8141417448",
+        mappedVAL[_defaultMonth],
         prefs.getString('token'),
         _defaultYear));
     orders.add(data);
@@ -87,11 +107,12 @@ class _PreviousDataState extends State<PreviousData> {
   }
 
   Widget makeTiles(OrdersData data) {
-    return ListView.builder(itemBuilder: (context, index) {
-      for (int i = 0; i < data.cities.length; i++) {
-        return previousDataTiles(
-            data.orderIds[i], data.cities[i], data.commodityStatus[i]);
-      }
+    
+    return ListView.builder(
+      itemCount: data.cities.length,
+      itemBuilder: (context, index) {
+      return previousDataTiles(
+            data.orderNumbers[index], data.cities[index], "Completed",data.dates[index],data.months[index],data.commodities[index]);
     });
   }
 
@@ -103,7 +124,7 @@ class _PreviousDataState extends State<PreviousData> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 10.0),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.0),
+              borderRadius: BorderRadius.circular(10.0),
               border: Border.all(
                   color: Colors.black, style: BorderStyle.solid, width: 0.20),
             ),
@@ -133,7 +154,7 @@ class _PreviousDataState extends State<PreviousData> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 10.0),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.0),
+              borderRadius: BorderRadius.circular(10.0),
               border: Border.all(
                   color: Colors.black, style: BorderStyle.solid, width: 0.20),
             ),
@@ -162,11 +183,11 @@ class _PreviousDataState extends State<PreviousData> {
     );
   }
 
-  Widget previousDataTiles(String number, String location, String status) {
+  Widget previousDataTiles(String number, String location, String status,String date,String month,String commodity) {
     return InkWell(
       onTap: () {},
       child: Card(
-        elevation: 1.0,
+        elevation: 0.8,
         margin: EdgeInsets.all(10.0),
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(10.0))),
@@ -197,13 +218,15 @@ class _PreviousDataState extends State<PreviousData> {
                     ],
                   ),
                   SizedBox(
-                    height: 5.0,
+                    height: 8.0,
                   ),
-                  Text('26-09-19,10:10 A.M'),
+                 
+                  
+                  Text("$commodity",style:TextStyle(fontWeight: FontWeight.bold)),
                   SizedBox(
-                    height: 10.0,
+                    height: 8.0,
                   ),
-                  locationTile(location)
+                  locationTile(location,date,month)
                 ],
               ),
             ),
@@ -246,16 +269,18 @@ class _PreviousDataState extends State<PreviousData> {
     );
   }
 
-  Widget locationTile(String location) {
+  Widget locationTile(String location,String date,String month) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       // crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Icon(
           Icons.location_on,
-          size: 20.0,
+          size: 15.0,
+          color: Colors.red,
         ),
-        Text('$location')
+        Text('$location, '),
+         Text('$date-$month-19,10:10 '),
       ],
     );
   }
