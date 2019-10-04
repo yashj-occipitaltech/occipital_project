@@ -47,6 +47,8 @@ class _MyAppState extends State<MyApp> {
       child: ScopedModelDescendant(
         builder: (context, child, UserModel model) {
           return MaterialApp(
+
+              debugShowCheckedModeBanner: false,
               routes: {
                 '/home': (context) => BottomNavigator(),
                 '/signup': (context) => SignUpScreen(),
@@ -54,7 +56,9 @@ class _MyAppState extends State<MyApp> {
               },
               title: 'Flutter Demo',
               theme: ThemeData(
-                primarySwatch: Colors.blue,
+                primarySwatch: Colors.green,
+                
+                bottomAppBarColor: Colors.green,
               ),
               home: _isAuthenticated ? BottomNavigator() : LoginOTPScreen());
         },

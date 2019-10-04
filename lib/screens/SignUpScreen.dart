@@ -6,6 +6,7 @@ import 'package:occipital_tech/models/user_check.dart';
 import 'package:occipital_tech/models/verify_trader.dart';
 import 'package:occipital_tech/scoped_models/user_model.dart';
 import 'package:occipital_tech/util/ApiClient.dart';
+import 'package:occipital_tech/util/result_codes.dart';
 import 'package:occipital_tech/util/widgets.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -127,7 +128,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         if (!RegExp(
                 r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
             .hasMatch(value)) {
-          return 'Please enter validate email ';
+          return 'Please enter correct email ';
         }
         return null;
       },
@@ -230,18 +231,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _formKey.currentState.save();
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final data = await model.storeUser(StoreUserData(
-          DateFormat("dd-MM-yyyy").format(now),
+          now.day.toString(),
           DateFormat("H:m:s").format(now),
           prefs.getString('phoneNo'),
           _controllerOne.text,
           _userType,
           _companyId,
-          _email));
+          _email,
+          now.month.toString(),
+          now.year.toString()));
 
       if (data['success'] == true && data['message'] == 'True') {
         Fluttertoast.showToast(msg: 'Successful');
         Navigator.pushReplacementNamed(context, '/home');
+      } else if (data['resultCode'] == ResultCodes.jsonError) {
+        Fluttertoast.showToast(msg: 'Some error occured.Please try again');
       } else {
+        print(data['message']);
         Fluttertoast.showToast(msg: data['message']);
       }
     }
@@ -253,8 +259,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       final data =
           await model.verifyTrader(VerifyTrader(_companyId, _password));
       if (data['error'] == true && data['verified'] == false) {
-        print('ERrro');
-      //  Fluttertoast.showToast(msg: data['status']);
+        Fluttertoast.showToast(msg: data['status']);
       } else if (data['error'] == false && data['verified'] == true) {
         _savedata(model);
       }

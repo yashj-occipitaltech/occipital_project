@@ -4,5 +4,8 @@ class ApiEndpoints{
   static const storeUser = '/storeUserData';
   static const verifyTrader = '/verifyTrader';
   static const getOrderIds = "/getOrderIds";
+  static const uploadImages = "/uploadImages";
+  static const checkOrderStatus = "/checkStatus";
+  static const getOrderData = "/getOrderData";
 
 }

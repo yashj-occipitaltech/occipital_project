@@ -18,8 +18,12 @@ class StoreUserData{
   String companyId;
   @JsonKey(name: 'MailId')
   String email;
+  @JsonKey(name: 'Month')
+  String month;
+  @JsonKey(name: 'Year')
+  String year;
 
-  StoreUserData(this.date,this.time,this.userId,this.userName,this.userType,this.companyId,this.email);
+  StoreUserData(this.date,this.time,this.userId,this.userName,this.userType,this.companyId,this.email,this.month,this.year);
  
   factory StoreUserData.fromJson(Map<String, dynamic> json) => _$StoreUserDataFromJson(json);
 

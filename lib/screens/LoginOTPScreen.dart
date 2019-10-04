@@ -298,7 +298,7 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
       if (response['success'] == 'True') {
         Navigator.pushNamed(context, '/signup');
       } 
-      else if(response['success']=='Error' || response['resultCode']==2 || response['resultCode']==20 ){
+      else if(response['success']=='Error' || response['resultCode']==2 ){
         Fluttertoast.showToast(msg: 'Some error occured.Please try again');
       }
       else  {

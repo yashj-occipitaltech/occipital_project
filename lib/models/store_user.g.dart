@@ -15,6 +15,8 @@ StoreUserData _$StoreUserDataFromJson(Map<String, dynamic> json) {
     json['UserType'] as String,
     json['CompanyId'] as String,
     json['MailId'] as String,
+    json['Month'] as String,
+    json['Year'] as String,
   );
 }
 
@@ -27,4 +29,6 @@ Map<String, dynamic> _$StoreUserDataToJson(StoreUserData instance) =>
       'Time': instance.time,
       'CompanyId': instance.companyId,
       'MailId': instance.email,
+      'Month': instance.month,
+      'Year': instance.year,
     };

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:occipital_tech/screens/HomePage.dart';
+import 'package:occipital_tech/util/widgets.dart';
 
 
 class CommodityForm extends StatefulWidget {
@@ -14,9 +15,7 @@ class _CommodityFormState extends State<CommodityForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('New Data'),
-      ),
+      appBar: Widgets.appBar('New Data'),
       body: Form(
               child: ListView(
           padding: EdgeInsets.all(16.0),

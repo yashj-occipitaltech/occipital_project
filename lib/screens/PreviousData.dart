@@ -18,15 +18,15 @@ class _PreviousDataState extends State<PreviousData> {
   String _defaultYear = "2019";
 
   Map<String,String> mappedVAL = {
-    "January":"1",
-    "February":"2",
-    "March":"3",
-    "April":"4",
-    "May":"5",
-    "June":"6",
-    "July":"7",
-    "August":"8",
-    "September":"9",
+    "January":"01",
+    "February":"02",
+    "March":"03",
+    "April":"04",
+    "May":"05",
+    "June":"06",
+    "July":"07",
+    "August":"08",
+    "September":"09",
     "October":"10",
     "November":"11",
     "December":"12"
@@ -61,6 +61,7 @@ class _PreviousDataState extends State<PreviousData> {
   }
 
   _getOrders() async {
+    print('I ran hrer');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     print(GetOrderId(
         prefs.getString('phoneNo'),
@@ -68,7 +69,7 @@ class _PreviousDataState extends State<PreviousData> {
         prefs.getString('token'),
         _defaultYear).toJson());
     final data = await ApiClient.getOrderIds(GetOrderId(
-        "8141417448",
+        prefs.getString('phoneNo'),
         mappedVAL[_defaultMonth],
         prefs.getString('token'),
         _defaultYear));

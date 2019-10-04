@@ -11,6 +11,7 @@ UserCheckStatus _$UserCheckStatusFromJson(Map<String, dynamic> json) {
     json['Status'] as String,
     json['ResultCode'] as String,
     json['Token'] as String,
+    json['UserType'] as String,
   );
 }
 
@@ -19,4 +20,5 @@ Map<String, dynamic> _$UserCheckStatusToJson(UserCheckStatus instance) =>
       'Status': instance.status,
       'ResultCode': instance.resultCode,
       'Token': instance.token,
+      'UserType': instance.userType,
     };

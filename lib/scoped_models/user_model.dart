@@ -34,6 +34,7 @@ class UserModel extends Model {
     //  _userExists.add(true);
       _authenticatedUser = User(
         accessToken: response.token,
+        userType: response.userType
       );
        _savePrefs(_authenticatedUser);
       _userSubject.add(true);
@@ -67,11 +68,11 @@ class UserModel extends Model {
         response.token == null) {
       hasError = true;
     }
-
+    print(response.toJson());
     _setState(ViewState.Retrieved);
     isLoading = false;
 
-    return {'success': !hasError, 'message': response.status};
+    return {'success': !hasError, 'message': response.status,'resultCode':response.resultCode};
   }
 
   Future<Map<String, dynamic>> verifyTrader(VerifyTrader data) async {
