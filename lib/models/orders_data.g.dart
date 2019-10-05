@@ -15,11 +15,12 @@ OrdersData _$OrdersDataFromJson(Map<String, dynamic> json) {
     (json['MarkerStatus'] as List)?.map((e) => e as String)?.toList(),
     (json['Month'] as List)?.map((e) => e as String)?.toList(),
     (json['OrderId'] as List)?.map((e) => e as String)?.toList(),
-    (json['OrderNumber'] as List)?.map((e) => e as String)?.toList(),
+    json['OrderNumber'] as List,
     (json['PDFStatus'] as List)?.map((e) => e as String)?.toList(),
     json['ResultCode'] as String,
     json['Status'] as String,
     (json['Time'] as List)?.map((e) => e as String)?.toList(),
+    (json['Year'] as List)?.map((e) => e as String)?.toList(),
   );
 }
 
@@ -35,6 +36,7 @@ Map<String, dynamic> _$OrdersDataToJson(OrdersData instance) =>
       'OrderNumber': instance.orderNumbers,
       'PDFStatus': instance.pdfStatuses,
       'Time': instance.times,
+      'Years': instance.years,
       'ResultCode': instance.resultCode,
       'Status': instance.status,
     };

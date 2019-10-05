@@ -9,6 +9,7 @@ import 'package:occipital_tech/screens/RecentOrdersScreen.dart';
 import 'package:occipital_tech/screens/SettingsScreen.dart';
 import 'package:occipital_tech/util/AppDrawer.dart';
 import 'package:occipital_tech/util/widgets.dart';
+import 'package:occipital_tech/util/colorValues.dart';
 
 class BottomNavigator extends StatefulWidget {
   @override
@@ -39,7 +40,7 @@ class _BottomNavigatorState extends State<BottomNavigator> {
           drawer: AppDrawer(),
           floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
           floatingActionButton: FloatingActionButton(
-            backgroundColor: Colors.green[400],
+            backgroundColor: Color(0XFF01AF51),
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => CommodityForm()),
@@ -57,7 +58,7 @@ class _BottomNavigatorState extends State<BottomNavigator> {
               shape: CircularNotchedRectangle(),
               notchMargin: 8.0,
               child: BottomNavigationBar(
-                backgroundColor: Colors.green[400],
+                backgroundColor: Color(0XFF01AF51),
                 selectedItemColor: Colors.black54,
                 currentIndex: _currentIndex,
                 onTap: (int index) {

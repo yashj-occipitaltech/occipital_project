@@ -10,6 +10,7 @@ import 'package:rxdart/subjects.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'dart:math' as math;
+import 'package:occipital_tech/util/colorValues.dart';
 
 class OrderResultScreen extends StatefulWidget {
   final String orderId;
@@ -62,7 +63,11 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
                   sizeTable(),
                   pieCharts(order.colorDetails[0]),
                   SizedBox(height: 15.0),
-                  RaisedButton(child: Text('Press me'),
+                  FlatButton(
+                    shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(30.0) ),
+                    padding: EdgeInsets.all(16.0),
+                    color: Color(0XFF01AF51),
+                    child: Text('Order Detail',style: TextStyle(color:Colors.white,fontSize: 16.0 ),),
                   onPressed: (){
                     Navigator.push(context, MaterialPageRoute(builder: (context) => OrderDetailScreen(order.imageURLs)));
                   }
@@ -106,7 +111,7 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18.0,
-                          color: Colors.green[400]),
+                          color: Color(0XFF01AF51)),
                     )
                   ],
                 ),

@@ -23,11 +23,11 @@ class UserModel extends Model {
   PublishSubject<bool> get userSubject => _userSubject;
   PublishSubject<bool> get userExists => _userExists;
   ViewState get state => _state;
+  Function get changeStateFunc => _setState;
 
 //Functions for login functionality
   Future<Map<String, dynamic>> checkUser(UserCheck user) async {
     _setState(ViewState.Busy);
-    isLoading = true;
     final response = await ApiClient.checkUser(user);
     print(response.toJson());
     if (response.resultCode == ResultCodes.successCode && response.token!=null) {

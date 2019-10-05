@@ -10,6 +10,7 @@ import 'package:occipital_tech/util/result_codes.dart';
 import 'package:occipital_tech/util/widgets.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:occipital_tech/util/colorValues.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -210,7 +211,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Widget submitButton(BuildContext context, UserModel model) {
     return RaisedButton(
-        color: Colors.green[400],
+        color: Color(0XFF01AF51),
         padding: EdgeInsets.all(16.0),
         child: model.isLoading
             ? CircularProgressIndicator(

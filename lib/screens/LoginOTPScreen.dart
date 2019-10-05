@@ -17,7 +17,7 @@ class LoginOTPScreen extends StatefulWidget {
 
 class _LoginOTPScreenState extends State<LoginOTPScreen> {
   String phoneNo;
-  String smsOTP='';
+  String smsOTP = '';
   String verificationId;
   String errorMessage = '';
   bool hasError = false;
@@ -29,6 +29,7 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
   }
 
   Future<void> verifyPhone() async {
+    //locator<UserModel>().changeStateFunc(ViewState.Busy);
     final PhoneCodeSent smsOTPSent = (String verId, [int forceCodeResend]) {
       this.verificationId = verId;
       smsOTPDialog(context).then((value) {
@@ -95,19 +96,22 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ScopedModelDescendant(
-      builder: (context, chuild, UserModel model) => Scaffold(
-        body: Form(
-          key: _formKeyOTP,
-          child: ListView(
-            children: <Widget>[loginView()],
+    return ScopedModel(
+      model: locator<UserModel>(),
+      child: ScopedModelDescendant(
+        builder: (context, child, UserModel model) => Scaffold(
+          body: Form(
+            key: _formKeyOTP,
+            child: ListView(
+              children: <Widget>[loginView(model)],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget loginView() {
+  Widget loginView(UserModel model) {
     return Column(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -130,7 +134,7 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
         SizedBox(
           height: 30.0,
         ),
-        submitButton(),
+        submitButton(model),
         SizedBox(
           height: 10.0,
         )
@@ -155,7 +159,6 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
                 ),
                 visible: hasError,
               ),
-              
               SizedBox(
                 height: 10.0,
               ),
@@ -172,15 +175,14 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
                         ),
                   onPressed: () async {
                     final user = await _auth.currentUser();
-                     if(smsOTP.isEmpty || smsOTP.length<6){
-                       Fluttertoast.showToast(msg: 'Please enter the OTP');
-                       setState(() {
-                         hasError = true;
-                       });
-                     } else{
-                        _onButtonPressed(user);
-                     }
-                   
+                    if (smsOTP.isEmpty || smsOTP.length < 6) {
+                      Fluttertoast.showToast(msg: 'Please enter the OTP');
+                      setState(() {
+                        hasError = true;
+                      });
+                    } else {
+                      _onButtonPressed(user);
+                    }
                   },
                 ),
               ),
@@ -210,7 +212,7 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
     );
   }
 
-  Widget submitButton() {
+  Widget submitButton(UserModel model) {
     return Align(
       alignment: Alignment.bottomCenter,
       child: RawMaterialButton(
@@ -238,8 +240,10 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height * 0.6,
       decoration: BoxDecoration(
-          image: DecorationImage(image: ExactAssetImage('assets/login_screen.png'),fit: BoxFit.fitHeight),
-          ),
+        image: DecorationImage(
+            image: ExactAssetImage('assets/login_screen.png'),
+            fit: BoxFit.fitHeight),
+      ),
     );
   }
 
@@ -269,7 +273,6 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
         },
         autofocus: true,
         autocorrect: false,
-        
         keyboardType: TextInputType.number,
         inputFormatters: <TextInputFormatter>[
           WhitelistingTextInputFormatter.digitsOnly,
@@ -297,11 +300,10 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
       final response = await model.checkUser(UserCheck(phoneNo.substring(3)));
       if (response['success'] == 'True') {
         Navigator.pushNamed(context, '/signup');
-      } 
-      else if(response['success']=='Error' || response['resultCode']==2 ){
+      } else if (response['success'] == 'Error' ||
+          response['resultCode'] == 2) {
         Fluttertoast.showToast(msg: 'Some error occured.Please try again');
-      }
-      else  {
+      } else {
         Navigator.pushReplacementNamed(context, '/home');
       }
     } else {

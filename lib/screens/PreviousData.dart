@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:occipital_tech/models/get_orderId.dart';
 import 'package:occipital_tech/models/orders_data.dart';
+import 'package:occipital_tech/screens/OrderDataTiles.dart';
 import 'package:occipital_tech/screens/OrderResultScreen.dart';
 import 'package:occipital_tech/util/ApiClient.dart';
 import 'package:occipital_tech/util/widgets.dart';
@@ -18,19 +19,19 @@ class _PreviousDataState extends State<PreviousData> {
   String _defaultMonth = "January";
   String _defaultYear = "2019";
 
-  Map<String,String> mappedVAL = {
-    "January":"01",
-    "February":"02",
-    "March":"03",
-    "April":"04",
-    "May":"05",
-    "June":"06",
-    "July":"07",
-    "August":"08",
-    "September":"09",
-    "October":"10",
-    "November":"11",
-    "December":"12"
+  Map<String, String> mappedVAL = {
+    "January": "01",
+    "February": "02",
+    "March": "03",
+    "April": "04",
+    "May": "05",
+    "June": "06",
+    "July": "07",
+    "August": "08",
+    "September": "09",
+    "October": "10",
+    "November": "11",
+    "December": "12"
   };
 
   List<String> months = [
@@ -64,11 +65,9 @@ class _PreviousDataState extends State<PreviousData> {
   _getOrders() async {
     print('I ran hrer');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    print(GetOrderId(
-        prefs.getString('phoneNo'),
-        mappedVAL[_defaultMonth],
-        prefs.getString('token'),
-        _defaultYear).toJson());
+    print(GetOrderId(prefs.getString('phoneNo'), mappedVAL[_defaultMonth],
+            prefs.getString('token'), _defaultYear)
+        .toJson());
     final data = await ApiClient.getOrderIds(GetOrderId(
         prefs.getString('phoneNo'),
         mappedVAL[_defaultMonth],
@@ -112,9 +111,26 @@ class _PreviousDataState extends State<PreviousData> {
     return ListView.builder(
       itemCount: data.cities.length,
       itemBuilder: (context, index) {
-      return previousDataTiles(
-            data.orderNumbers[index], data.cities[index], "Completed",data.dates[index],data.months[index],data.commodities[index],data.orderIds[index].toString());
-    });
+        String status = "";
+        if (data.pdfStatuses[index] == 'True' &&
+            data.commodityStatus[index] == 'True' &&
+            data.markerStatuses[index] == 'True') {
+          status = 'Completed';
+        } else {
+          status = "Error";
+        }
+        return OrderDataTiles(
+            data.orderNumbers[index].toString(),
+            data.cities[index],
+            "$status",
+            data.dates[index],
+            data.months[index],
+            data.commodities[index],
+            data.orderIds[index].toString(),
+            data.times[index],
+            data.years[index]);
+      },
+    );
   }
 
   Widget _dropDowns() {
@@ -180,111 +196,6 @@ class _PreviousDataState extends State<PreviousData> {
             ),
           ),
         ),
-      ],
-    );
-  }
-
-  Widget previousDataTiles(String number, String location, String status,String date,String month,String commodity,String orderId) {
-    return InkWell(
-      onTap: () {
-        print(orderId);
-        Navigator.push(context, MaterialPageRoute(builder: (context) => OrderResultScreen(orderId)));
-      },
-      child: Card(
-        elevation: 0.8,
-        margin: EdgeInsets.all(10.0),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0))),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Text(
-                        'Order No:',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 18.0),
-                      ),
-                      Text(
-                        ' $number',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18.0,
-                            color: Colors.green[400]),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 8.0,
-                  ),
-                 
-                  
-                  Text("$commodity",style:TextStyle(fontWeight: FontWeight.bold)),
-                  SizedBox(
-                    height: 8.0,
-                  ),
-                  locationTile(location,date,month)
-                ],
-              ),
-            ),
-            statusChip(status)
-          ],
-        ),
-      ),
-    );
-  }
-
-  Color getColorForStatus(String status) {
-    switch (status) {
-      case 'Uploaded':
-        return Colors.yellow[700];
-        break;
-      case 'Completed':
-        return Colors.green[600];
-        break;
-      case 'Processing':
-        return Colors.orange[600];
-
-        break;
-    }
-  }
-
-  Widget statusChip(String status) {
-    return Container(
-      width: 100.0,
-      padding: EdgeInsets.all(10.0),
-      child: Text(
-        status,
-        textAlign: TextAlign.center,
-        style: TextStyle(color: Colors.white),
-      ),
-      decoration: BoxDecoration(
-          color: getColorForStatus(status),
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(50.0),
-              bottomLeft: Radius.circular(50.0))),
-    );
-  }
-
-  Widget locationTile(String location,String date,String month) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      // crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Icon(
-          Icons.location_on,
-          size: 15.0,
-          color: Colors.red,
-        ),
-        Text('$location, '),
-         Text('$date-$month-19,10:10 '),
       ],
     );
   }

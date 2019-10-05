@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:occipital_tech/screens/HomePage.dart';
 import 'package:occipital_tech/util/widgets.dart';
-
+import 'package:rxdart/subjects.dart';
 
 class CommodityForm extends StatefulWidget {
   @override
@@ -9,24 +10,45 @@ class CommodityForm extends StatefulWidget {
 }
 
 class _CommodityFormState extends State<CommodityForm> {
+  String _value = 'Onions';
 
-   String _value = 'Onions';
+  BehaviorSubject<List<ImageSource>> images = BehaviorSubject<List<ImageSource>>();
+
+  final _formKeyCommodity = GlobalKey<FormState>();
+
+
+  void initState(){
+    super.initState();
+   // images.add(Image.asset(name))
+  }
+
+  void dispose(){
+    super.dispose();
+    images.close();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: Widgets.appBar('New Data'),
       body: Form(
-              child: ListView(
+        key: _formKeyCommodity,
+        child: ListView(
           padding: EdgeInsets.all(16.0),
           children: <Widget>[
-
             labelText('Commodity *'),
             _itemDown(),
             labelText('Description:'),
-            TextFormField(maxLines: 5,decoration: InputDecoration(border: OutlineInputBorder(),hintText: 'Enter a description'),),
-            SizedBox(height: 18.0),
-            imageUploadButton()
+            TextFormField(
+              maxLines: 5,
+              decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter a description'),
+            ),
+            //SizedBox(height: 10.0),
+            Widgets.labelText('Upload Images'),
+            Align(child: addButton(),alignment: Alignment.bottomLeft,)
+           // imageUploadButton()
           ],
         ),
       ),
@@ -35,14 +57,8 @@ class _CommodityFormState extends State<CommodityForm> {
 
   DropdownButton _itemDown() => DropdownButton<String>(
         items: [
-          DropdownMenuItem(
-            value: "Onions",
-            child: Text('Onions')
-          ),
-          DropdownMenuItem(
-            value: "Tomatoes",
-            child: Text('Tomatoes')
-          ),
+          DropdownMenuItem(value: "Onions", child: Text('Onions')),
+          DropdownMenuItem(value: "Tomatoes", child: Text('Tomatoes')),
         ],
         onChanged: (value) {
           setState(() {
@@ -55,25 +71,62 @@ class _CommodityFormState extends State<CommodityForm> {
         //isDense: true,
       );
 
+  Widget labelText(String label) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        SizedBox(
+          height: 10.0,
+        ),
+        Text(
+          label,
+          style: TextStyle(fontSize: 16.0),
+        ),
+        SizedBox(
+          height: 10.0,
+        )
+      ],
+    );
+  }
 
-      Widget labelText(String label){
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(height: 10.0,),
-            Text(label,style: TextStyle(fontSize: 16.0),),
-            SizedBox(height: 10.0,)
-          ],
+  Widget imageUploadButton() {
+    return RaisedButton(
+      onPressed: () => Navigator.push(
+          context, MaterialPageRoute(builder: (context) => ImageCapture())),
+      child: Text('Select an image to upload'),
+      padding: EdgeInsets.all(16.0),
+    );
+  }
+
+
+  Widget uploadImages(){
+    return StreamBuilder<Object>(
+      stream: images,
+      builder: (context, snapshot) {
+        return ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemBuilder: (context,index){
+
+          },
         );
       }
+    );
+  }
 
 
-      Widget imageUploadButton(){
-        return RaisedButton(
-          onPressed:() => Navigator.push(context, MaterialPageRoute(builder: (context) => ImageCapture())),
-          child: Text('Select an image to upload'),
-          padding: EdgeInsets.all(16.0)
-          ,
-        );
-      }
+  Widget addButton(){
+    return InkWell(
+          onTap: (){},
+          child: SizedBox(
+        
+        //padding: EdgeInsets.all(20.0),
+        height:100.0 ,
+        width: 80.0,
+        //width: 0.8,
+        child: Container(child: Text('+'),decoration: BoxDecoration(border: Border.all(color:Colors.black )),),
+      ),
+    );
+  }
+
+
 }

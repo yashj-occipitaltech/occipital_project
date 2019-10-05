@@ -6,6 +6,7 @@ import 'package:occipital_tech/screens/ContactScreen.dart';
 import 'package:occipital_tech/screens/HelpScreen.dart';
 import 'package:occipital_tech/screens/SettingsScreen.dart';
 import 'package:occipital_tech/util/locator.dart';
+import 'package:occipital_tech/util/colorValues.dart';
 
 class AppDrawer extends StatefulWidget {
   @override
@@ -57,7 +58,7 @@ class _AppDrawerState extends State<AppDrawer> {
             children: <Widget>[
               Icon(
                 iconName,
-                color: Colors.green[400],
+                color: Color(0XFF01AF51),
                 size: 25.0,
               ),
               SizedBox(
@@ -122,7 +123,7 @@ class _AppDrawerState extends State<AppDrawer> {
               children: <Widget>[
                 Icon(
                   Icons.account_circle,
-                  color: Colors.green[400],
+                  color: Color(0XFF01AF51),
                   size: 25.0,
                 ),
                 SizedBox(

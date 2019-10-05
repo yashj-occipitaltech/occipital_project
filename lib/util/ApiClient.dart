@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:occipital_tech/models/get_orderId.dart';
 import 'package:occipital_tech/models/get_order_data.dart';
+import 'package:occipital_tech/models/get_recent_orders.dart';
 import 'package:occipital_tech/models/order_status_check.dart';
 import 'package:occipital_tech/models/orders_data.dart';
 import 'package:occipital_tech/models/store_user.dart';
@@ -13,9 +14,11 @@ import 'package:occipital_tech/models/user_check.dart';
 import 'package:occipital_tech/models/user_check_status.dart';
 import 'package:occipital_tech/models/verify_trader.dart';
 import 'package:occipital_tech/util/consts.dart';
+import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiClient {
+  
   static Future<UserCheckStatus> checkUser(UserCheck user) async {
     final response = await http.post(
         ApiEndpoints.baseUrl + ApiEndpoints.checkUser,
@@ -51,6 +54,13 @@ class ApiClient {
   }
 
   static Future<UploadImagesResponse> uploadImages(UploadOrder order) async {
+    Dio dio =  Dio();
+    final data = await dio.post(' ApiEndpoints.baseUrl + ApiEndpoints.getOrderIds',data: [
+      FormData.fromMap({"files":[
+        await MultipartFile.fromFile("./text1.txt", filename: "text1.txt")
+      ]},)
+    ],);
+
     final response = await http.post(
         ApiEndpoints.baseUrl + ApiEndpoints.getOrderIds,
         body: json.encode(order));
@@ -79,6 +89,16 @@ class ApiClient {
     print(response.body.toString());
 
     return GetOrderData.fromJson(json.decode(response.body));
+  }
+
+  static Future<OrdersData> getLastSomeOrders(GetRecentOrders order) async {
+    final response = await http.post(
+        ApiEndpoints.baseUrl + ApiEndpoints.getLastSomeOrders,
+        body: json.encode(order));
+
+    print(response.body.toString());
+
+    return OrdersData.fromJson(json.decode(response.body));
   }
 
   // static Future<Map<String, dynamic>> getTokenandNumber() async {

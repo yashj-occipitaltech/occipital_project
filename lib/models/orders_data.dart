@@ -21,18 +21,20 @@ class OrdersData{
   @JsonKey(name: "OrderId")
   List<String> orderIds;
   @JsonKey(name: "OrderNumber")
-  List<String> orderNumbers;
+  List<dynamic> orderNumbers;
   @JsonKey(name: "PDFStatus")
   List<String> pdfStatuses;
   @JsonKey(name: "Time")
   List<String> times;
+  @JsonKey(name: "Year")
+  List<String> years;
   @JsonKey(name: "ResultCode")
   String resultCode;
   @JsonKey(name: "Status")
   String status;
  
 
- OrdersData(this.cities,this.commodities,this.commodityStatus,this.dates,this.markerStatuses,this.months,this.orderIds,this.orderNumbers,this.pdfStatuses,this.resultCode,this.status,this.times);
+ OrdersData(this.cities,this.commodities,this.commodityStatus,this.dates,this.markerStatuses,this.months,this.orderIds,this.orderNumbers,this.pdfStatuses,this.resultCode,this.status,this.times,this.years);
 
  factory OrdersData.fromJson(Map<String, dynamic> json) => _$OrdersDataFromJson(json);
 

@@ -58,7 +58,7 @@ class _MyAppState extends State<MyApp> {
               theme: ThemeData(
                 primarySwatch: Colors.green,
                 
-                bottomAppBarColor: Colors.green,
+               // bottomAppBarColor: Colors.green,
               ),
               home: _isAuthenticated ? BottomNavigator() : LoginOTPScreen());
         },
@@ -66,3 +66,5 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+
+
