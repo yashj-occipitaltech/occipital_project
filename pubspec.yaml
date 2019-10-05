@@ -35,6 +35,9 @@ dependencies:
   rxdart: ^0.22.2
   shared_preferences: ^0.5.3+4
   pin_code_text_field: ^1.4.0
+  pie_chart: ^1.2.0
+  flutter_image: ^2.0.0
+  flutter_swiper: ^1.1.6
 
 dev_dependencies:
   build_runner: ^1.7.1

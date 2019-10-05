@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:occipital_tech/models/get_orderId.dart';
 import 'package:occipital_tech/models/orders_data.dart';
+import 'package:occipital_tech/screens/OrderResultScreen.dart';
 import 'package:occipital_tech/util/ApiClient.dart';
 import 'package:occipital_tech/util/widgets.dart';
 import 'package:rxdart/rxdart.dart';
@@ -108,12 +109,11 @@ class _PreviousDataState extends State<PreviousData> {
   }
 
   Widget makeTiles(OrdersData data) {
-    
     return ListView.builder(
       itemCount: data.cities.length,
       itemBuilder: (context, index) {
       return previousDataTiles(
-            data.orderNumbers[index], data.cities[index], "Completed",data.dates[index],data.months[index],data.commodities[index]);
+            data.orderNumbers[index], data.cities[index], "Completed",data.dates[index],data.months[index],data.commodities[index],data.orderIds[index].toString());
     });
   }
 
@@ -184,9 +184,12 @@ class _PreviousDataState extends State<PreviousData> {
     );
   }
 
-  Widget previousDataTiles(String number, String location, String status,String date,String month,String commodity) {
+  Widget previousDataTiles(String number, String location, String status,String date,String month,String commodity,String orderId) {
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        print(orderId);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => OrderResultScreen(orderId)));
+      },
       child: Card(
         elevation: 0.8,
         margin: EdgeInsets.all(10.0),

@@ -23,7 +23,7 @@ class GetOrderData {
   @JsonKey(name: 'Commodity')
   String commodity;
   @JsonKey(name: 'Samples')
-  String samples;
+  int samples;
   @JsonKey(name: 'OrderNumber')
   String ordernumber;
   @JsonKey(name: 'CommodityStatus')
@@ -33,7 +33,7 @@ class GetOrderData {
   @JsonKey(name: 'MarkerStatus')
   String markerStatus;
   @JsonKey(name: 'ColorDetails')
-  List<Map<String, dynamic>> colorDetails;
+  List<Map<String, double>> colorDetails;
   @JsonKey(name: 'Range')
   List range;
   @JsonKey(name: 'FrequencyArray')

@@ -17,43 +17,24 @@ class _AppDrawerState extends State<AppDrawer> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Drawer(
-        
         child: Container(
           color: Colors.white,
           child: ListView(
-
             padding: EdgeInsets.zero,
             children: <Widget>[
               Container(
-                
                 height: MediaQuery.of(context).size.height * 0.3,
-                //padding: EdgeInsets.all(5.0),
-              //child: Container(),
                 decoration: BoxDecoration(
-                  //border:Border.all() ,
-                  image: DecorationImage(image: ExactAssetImage('assets/home_logo.png'),fit: BoxFit.fitWidth)
-                ),
+                    //border:Border.all() ,
+                    image: DecorationImage(
+                        image: ExactAssetImage('assets/home_logo.png'),
+                        fit: BoxFit.fitWidth)),
               ),
               drawerTiles('Home', BottomNavigator(), Icons.home),
               drawerTiles('Settings', SettingsScreen(), Icons.settings),
               drawerTiles('Help', HelpScreen(), Icons.help),
-              drawerTiles('Contact us', ContactScreen(), Icons.contact_phone),
-              ListTile(
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      Icon(Icons.account_circle),
-                      SizedBox(
-                        width: 10.0,
-                      ),
-                      Text('Logout')
-                    ],
-                  ),
-                  onTap: ()  {
-                    Navigator.pop(context);
-                    _showDialog();
-                    
-                    }),
+              drawerTiles('Contact us', ContactScreen(), Icons.phone),
+              logoutTile()
             ],
           ),
         ),
@@ -67,14 +48,36 @@ class _AppDrawerState extends State<AppDrawer> {
     IconData iconName,
   ) {
     return ListTile(
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(iconName),
-          SizedBox(
-            width: 10.0,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Icon(
+                iconName,
+                color: Colors.green[400],
+                size: 25.0,
+              ),
+              SizedBox(
+                width: 10.0,
+              ),
+              Text(
+                name,
+                style: TextStyle(fontSize: 16.0),
+              )
+            ],
           ),
-          Text(name)
+          SizedBox(height: 15.0),
+          Padding(
+            padding: const EdgeInsets.only(left: 36.0),
+            child: Container(
+              height: 1.0,
+              width: 320.0,
+              color: Colors.black12,
+            ),
+          )
         ],
       ),
       onTap: () => Navigator.pushReplacement(
@@ -94,7 +97,9 @@ class _AppDrawerState extends State<AppDrawer> {
                 child: Text('Yes'),
                 onPressed: () {
                   locator<UserModel>().logout();
-                  Fluttertoast.showToast(msg: 'Successfully logged out',);
+                  Fluttertoast.showToast(
+                    msg: 'Successfully logged out',
+                  );
                   Navigator.pushReplacementNamed(context, '/loginotp');
                 },
               ),
@@ -104,6 +109,45 @@ class _AppDrawerState extends State<AppDrawer> {
               )
             ],
           );
+        });
+  }
+
+  Widget logoutTile() {
+    return ListTile(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Icon(
+                  Icons.account_circle,
+                  color: Colors.green[400],
+                  size: 25.0,
+                ),
+                SizedBox(
+                  width: 10.0,
+                ),
+                Text(
+                  'Logout',
+                  style: TextStyle(fontSize: 16.0),
+                )
+              ],
+            ),
+            SizedBox(height: 15.0),
+            Padding(
+              padding: const EdgeInsets.only(left: 36.0),
+              child: Container(
+                height: 1.0,
+                width: 320.0,
+                color: Colors.black12,
+              ),
+            )
+          ],
+        ),
+        onTap: () {
+          Navigator.pop(context);
+          _showDialog();
         });
   }
 }
