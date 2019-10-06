@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:http/http.dart' as http;
 import 'package:occipital_tech/models/get_orderId.dart';
 import 'package:occipital_tech/models/get_order_data.dart';
@@ -15,10 +17,10 @@ import 'package:occipital_tech/models/user_check_status.dart';
 import 'package:occipital_tech/models/verify_trader.dart';
 import 'package:occipital_tech/util/consts.dart';
 import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiClient {
-  
   static Future<UserCheckStatus> checkUser(UserCheck user) async {
     final response = await http.post(
         ApiEndpoints.baseUrl + ApiEndpoints.checkUser,
@@ -53,19 +55,47 @@ class ApiClient {
     return OrdersData.fromJson(json.decode(response.body));
   }
 
-  static Future<UploadImagesResponse> uploadImages(UploadOrder order) async {
-    Dio dio =  Dio();
-    final data = await dio.post(' ApiEndpoints.baseUrl + ApiEndpoints.getOrderIds',data: [
-      FormData.fromMap({"files":[
-        await MultipartFile.fromFile("./text1.txt", filename: "text1.txt")
-      ]},)
-    ],);
+  static Future<UploadImagesResponse> uploadImages(
+      UploadOrder order, List<File> images) async {
+    Dio dio = Dio();
+    final uploader = FlutterUploader();
+    String fileName = images[0].path.split('/').last;
+    final Directory dir = await getApplicationDocumentsDirectory();
+      final String savedDir = '/storage/emulated/0/Android/data/com.occipitaltech.agrograde/files/Pictures/';
+      print('---->');
+      
+      print(fileName);
+      print(savedDir);
+      print('---->');
+    final task = uploader.enqueue(
+      url: '35.200.246.43 + ${ApiEndpoints.getOrderIds}',
+      method: UploadMethod.POST,
+      files: [
+        FileItem(
+            filename: fileName,
+            fieldname: 'files',
+            savedDir: savedDir),
+      ],
+      data: order.toJson().cast<String,String>(),
+    );
+
+    final subscription = uploader.progress.listen((progress) {
+      print(progress);
+      //... code to handle progress
+    });
+    
+    print(subscription);
+    final uploadRequest = await dio.post(
+        '${ApiEndpoints.baseUrl + ApiEndpoints.getOrderIds}',
+        options: Options(method: 'POST'),
+        data: FormData.fromMap({"files": images}));
 
     final response = await http.post(
         ApiEndpoints.baseUrl + ApiEndpoints.getOrderIds,
         body: json.encode(order));
 
-    print(response.body.toString());
+    print(uploadRequest.data.toString());
+    // print(response.body.toString());
 
     return UploadImagesResponse.fromJson(json.decode(response.body));
   }

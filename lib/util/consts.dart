@@ -10,3 +10,8 @@ class ApiEndpoints{
   static const getLastSomeOrders = "/getLastSomeOrders";
 
 }
+
+
+class Values{
+  static const int uploadsAllowed = 5;
+}
