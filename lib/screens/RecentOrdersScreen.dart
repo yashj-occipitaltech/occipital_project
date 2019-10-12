@@ -45,16 +45,21 @@ class _RecentOrdersScreenState extends State<RecentOrdersScreen> {
         appBar: AppBar(
           actions: <Widget>[
             StreamBuilder<Object>(
-              stream: orders,
-              builder: (context, snapshot) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 15.0),
-                  child:orders.value==null ? Center(child: Container(),): InkWell(onTap: () {
-                    init();
-                  }, child: Icon(Icons.refresh)),
-                );
-              }
-            )
+                stream: orders,
+                builder: (context, snapshot) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 15.0),
+                    child: orders.value == null
+                        ? Center(
+                            child: Container(),
+                          )
+                        : InkWell(
+                            onTap: () {
+                              init();
+                            },
+                            child: Icon(Icons.refresh)),
+                  );
+                })
           ],
           iconTheme: IconThemeData(color: Colors.black),
           elevation: 0.0,
@@ -66,46 +71,63 @@ class _RecentOrdersScreenState extends State<RecentOrdersScreen> {
           backgroundColor: Colors.white,
         ),
         drawer: AppDrawer(),
-        body: StreamBuilder(
-          stream: orders,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final data = snapshot.data as OrdersData;
-              print(data.cities);
-              if (data.cities == null || data.cities.length == 0) {
-                return Center(
-                  child: Text('No orders found'),
+        body: RefreshIndicator(
+                  onRefresh: () async=> await init(),
+                  child: StreamBuilder(
+            stream: orders,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final data = snapshot.data as OrdersData;
+                print(data.cities);
+                if (data.cities == null || data.cities.length == 0) {
+                  return Center(
+                    child: Text('No orders found'),
+                  );
+                }
+
+                return ListView.builder(
+                  //padding: EdgeInsets.all(16.0),
+                  itemCount: data.cities.length,
+                  itemBuilder: (context, index) {
+                    String status = "";
+                    if (data.pdfStatuses[index] == 'False' &&
+                        data.commodityStatus[index] == 'False' &&
+                        data.markerStatuses[index] == 'False') {
+                      status = 'Processing 0%';
+                    } else if (data.commodityStatus[index] == 'True' &&
+                        data.pdfStatuses[index] == 'False' &&
+                        data.markerStatuses[index] == 'False') {
+                      status = "Processing 50%";
+                    } else if (data.commodityStatus[index] == 'True' &&
+                        data.pdfStatuses[index] == 'True' &&
+                        data.markerStatuses[index] == 'False') {
+                      status = "Processing 80%";
+                    } else if (data.markerStatuses[index] == 'Error') {
+                      status = "Error";
+                    } else if (data.commodityStatus[index] == 'True' &&
+                        data.pdfStatuses[index] == 'True' &&
+                        data.markerStatuses[index] == 'True') {
+                      status = "Completed";
+                    } else {
+                      status = "Completed";
+                    }
+                    return OrderDataTiles(
+                        data.orderNumbers[index].toString(),
+                        data.cities[index],
+                        "$status",
+                        data.dates[index],
+                        data.months[index],
+                        data.commodities[index],
+                        data.orderIds[index].toString(),
+                        data.times[index],
+                        data.years[index]);
+                  },
                 );
               }
 
-              return ListView.builder(
-                //padding: EdgeInsets.all(16.0),
-                itemCount: data.cities.length,
-                itemBuilder: (context, index) {
-                  String status = "";
-                  if (data.pdfStatuses[index] == 'True' &&
-                      data.commodityStatus[index] == 'True' &&
-                      data.markerStatuses[index] == 'True') {
-                    status = 'Completed';
-                  } else {
-                    status = "Error";
-                  }
-                  return OrderDataTiles(
-                      data.orderNumbers[index].toString(),
-                      data.cities[index],
-                      "$status",
-                      data.dates[index],
-                      data.months[index],
-                      data.commodities[index],
-                      data.orderIds[index].toString(),
-                      data.times[index],
-                      data.years[index]);
-                },
-              );
-            }
-
-            return Center(child: CircularProgressIndicator());
-          },
+              return Center(child: CircularProgressIndicator());
+            },
+          ),
         ));
   }
 

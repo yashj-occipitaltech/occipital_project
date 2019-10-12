@@ -7,6 +7,7 @@ import 'package:occipital_tech/screens/OrderDetailScreen.dart';
 import 'package:occipital_tech/util/ApiClient.dart';
 import 'package:occipital_tech/util/widgets.dart';
 import 'package:rxdart/subjects.dart';
+import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'dart:math' as math;
@@ -44,13 +45,52 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
   Widget build(BuildContext context) {
     // print(orderData.orderId);
     return Scaffold(
-      appBar: Widgets.appBar('Result'),
+      appBar: AppBar(
+        iconTheme:  IconThemeData(color: Colors.black),
+      elevation: 0.0,
+      title: Text('Order Detail',style: TextStyle(color: Colors.black),),
+      centerTitle: true,
+      backgroundColor: Colors.white,
+        actions: <Widget>[
+          StreamBuilder<Object>(
+            stream: orderData,
+            builder: (context, snapshot) {
+              if(snapshot.hasData){
+                final data = snapshot.data as GetOrderData;
+                return InkWell(child: Padding(
+                  padding: const EdgeInsets.only(right:15.0),
+                  child: Icon(Icons.share),
+                ),onTap: (){
+                Share.share(data.pdfPath);
+              },);
+              }
+              return Container();
+            }
+          ),
+          StreamBuilder<Object>(
+            stream: orderData,
+            builder: (context, snapshot) {
+              if(snapshot.hasData){
+                final data = snapshot.data as GetOrderData;
+                return InkWell(child: Padding(
+                  padding: const EdgeInsets.only(right:15.0),
+                  child: Icon(Icons.file_download),
+                ),onTap: (){
+               // Share.share(data.pdfPath);
+              },);
+              }
+              return Container();
+            }
+          ),
+
+        ],
+      ),
       body: StreamBuilder<Object>(
           stream: orderData,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               final order = snapshot.data as GetOrderData;
-              print(order.toJson());
+            //  print(order.toJson());
               return ListView(
                 padding: EdgeInsets.all(16.0),
                 children: <Widget>[

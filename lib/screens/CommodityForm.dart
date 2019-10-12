@@ -21,6 +21,8 @@ class CommodityForm extends StatefulWidget {
 class _CommodityFormState extends State<CommodityForm> {
   String _value = 'Onion';
 
+  String _description= '';
+
   List<File> _images = List<File>();
 
   BehaviorSubject<List<File>> images = BehaviorSubject<List<File>>();
@@ -103,7 +105,9 @@ Future<File> get _localFile async {
                           "Mumbai",
                           _value,
                           prefs.getString('userType'),
-                          prefs.getString('token')),
+                          prefs.getString('token'),
+                          _description
+                          ),
                       _images);
                  Navigator.pushReplacementNamed(context, '/home');
                  print(answer.toJson());     
@@ -123,6 +127,9 @@ Future<File> get _localFile async {
             _itemDown(),
             labelText('Description:'),
             TextFormField(
+              onChanged: (String val){
+                _description =val;
+              },
               maxLines: 5,
               decoration: InputDecoration(
                   border: OutlineInputBorder(),

@@ -17,13 +17,13 @@ class UserModel extends Model {
 
   User _authenticatedUser;
   bool isLoading = false;
-  ViewState _state=ViewState.Idle;
+  ViewState _state = ViewState.Idle;
 
   //getters for private variables
   User get user => _authenticatedUser;
   PublishSubject<bool> get userSubject => _userSubject;
   PublishSubject<bool> get userExists => _userExists;
-  BehaviorSubject<bool>  get loadingState => _loadingState;
+  BehaviorSubject<bool> get loadingState => _loadingState;
   ViewState get state => _state;
   Function get changeStateFunc => _setState;
 
@@ -32,21 +32,24 @@ class UserModel extends Model {
     isLoading = true;
     _loadingState.add(true);
     notifyListeners();
-  //  _setState(ViewState.Busy);
+    //  _setState(ViewState.Busy);
     final response = await ApiClient.checkUser(user);
     print(response.toJson());
-    if (response.resultCode == ResultCodes.successCode && response.token!=null) {
-    //  _userExists.add(true);
+    if (response.resultCode == ResultCodes.successCode &&
+        response.token != null) {
+      //  _userExists.add(true);
       _authenticatedUser = User(
         accessToken: response.token,
-        userType: response.userType
+        userType: response.userType,
+        commodities: response.commodities,
+        maxImages: response.maxImages,
       );
-       _savePrefs(_authenticatedUser);
+      _savePrefs(_authenticatedUser);
       _userSubject.add(true);
       notifyListeners();
     } else {
-       _userSubject.add(false);
-       notifyListeners();
+      _userSubject.add(false);
+      notifyListeners();
     }
     isLoading = false;
     _setState(ViewState.Retrieved);
@@ -65,6 +68,8 @@ class UserModel extends Model {
       _authenticatedUser = User(
           accessToken: response.token,
           userType: userData.userType,
+          commodities: response.commodities,
+          maxImages: response.maxImages,
           userName: userData.userName);
       _userSubject.add(true);
       _savePrefs(_authenticatedUser);
@@ -77,7 +82,11 @@ class UserModel extends Model {
     _setState(ViewState.Retrieved);
     isLoading = false;
 
-    return {'success': !hasError, 'message': response.status,'resultCode':response.resultCode};
+    return {
+      'success': !hasError,
+      'message': response.status,
+      'resultCode': response.resultCode
+    };
   }
 
   Future<Map<String, dynamic>> verifyTrader(VerifyTrader data) async {
@@ -119,7 +128,7 @@ class UserModel extends Model {
       notifyListeners();
     } else if (token == null) {
       _authenticatedUser = null;
-      _userSubject.add(false); 
+      _userSubject.add(false);
       notifyListeners();
     }
 

@@ -15,8 +15,11 @@ class UserCheckStatus{
   String token;
   @JsonKey(name: 'UserType',nullable: true)
   String userType;
-
-  UserCheckStatus(this.status,this.resultCode,this.token,this.userType);
+  @JsonKey(name: 'MaxImages')
+  int maxImages;
+  @JsonKey(name: 'Commodities')
+  List<String> commodities;
+  UserCheckStatus(this.status,this.resultCode,this.token,this.userType,this.commodities,this.maxImages);
 
 
   factory UserCheckStatus.fromJson(Map<String, dynamic> json) => _$UserCheckStatusFromJson(json);

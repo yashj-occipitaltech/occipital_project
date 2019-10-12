@@ -112,13 +112,29 @@ class _PreviousDataState extends State<PreviousData> {
       itemCount: data.cities.length,
       itemBuilder: (context, index) {
         String status = "";
-        if (data.pdfStatuses[index] == 'True' &&
-            data.commodityStatus[index] == 'True' &&
-            data.markerStatuses[index] == 'True') {
-          status = 'Completed';
-        } else {
+        if (data.pdfStatuses[index] == 'False' &&
+            data.commodityStatus[index] == 'False' &&
+            data.markerStatuses[index] == 'False') {
+          status = 'Processing 0%';
+          
+        } else if (data.commodityStatus[index] == 'True' &&
+            data.pdfStatuses[index] == 'False' &&
+            data.markerStatuses[index] == 'False') {
+          status = "Processing 50%";
+        } else if (data.commodityStatus[index] == 'True' &&
+            data.pdfStatuses[index] == 'True' &&
+            data.markerStatuses[index] == 'False') {
+          status = "Processing 80%";
+        } else if (data.markerStatuses[index] == 'Error') {
           status = "Error";
+        } else if (data.commodityStatus[index] == 'True' &&
+            data.pdfStatuses[index] == 'True' &&
+            data.markerStatuses[index] == 'True') {
+          status = "Completed";
+        }else{
+           status = "Completed";
         }
+
         return OrderDataTiles(
             data.orderNumbers[index].toString(),
             data.cities[index],

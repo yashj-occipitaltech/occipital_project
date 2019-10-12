@@ -109,6 +109,8 @@ class OrderDataTiles extends StatelessWidget {
   }
 
   Color getColorForStatus(String status) {
+    print('---->');
+    print(status);
     switch (status) {
       case 'Error':
         return Colors.red;
@@ -116,7 +118,13 @@ class OrderDataTiles extends StatelessWidget {
       case 'Completed':
         return Colors.green[600];
         break;
-      case 'Processing':
+      case 'Processing 0%':
+        return Colors.orange[600];
+        break;
+      case 'Processing 50%':
+        return Colors.orange[600];
+        break;
+      case 'Processing 80%':
         return Colors.orange[600];
 
         break;

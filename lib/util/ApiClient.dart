@@ -25,7 +25,7 @@ class ApiClient {
     final response = await http.post(
         ApiEndpoints.baseUrl + ApiEndpoints.checkUser,
         body: json.encode(user));
-
+    print(response.body.toString());
     return UserCheckStatus.fromJson(json.decode(response.body));
   }
 
