@@ -61,7 +61,7 @@ class ApiClient {
     final uploader = FlutterUploader();
     String fileName = images[0].path.split('/').last;
     final Directory dir = await getApplicationDocumentsDirectory();
-    final url = 'http://35.200.246.43${ApiEndpoints.uploadImages}';
+    final url = 'http://34.93.237.2${ApiEndpoints.uploadImages}';
     print(url);
       final String savedDir = '/storage/emulated/0/Android/data/com.occipitaltech.agrograde/files/Pictures/';
       print('---->');

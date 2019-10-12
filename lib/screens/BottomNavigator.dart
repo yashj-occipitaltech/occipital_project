@@ -32,13 +32,15 @@ class _BottomNavigatorState extends State<BottomNavigator> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-          onWillPop: ()async => true,
-          child: Scaffold(
-          appBar: Widgets.appBar(
-            appBarTitle,showRefresh: appBarTitle == "Home" ? true:false
-          ),
+      onWillPop: () async => true,
+      child: Scaffold(
+          appBar: appBarTitle == "Home"
+              ? null
+              : Widgets.appBar(appBarTitle,
+                  showRefresh: appBarTitle == "Home" ? true : false),
           drawer: AppDrawer(),
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
           floatingActionButton: FloatingActionButton(
             backgroundColor: Color(0XFF01AF51),
             onPressed: () => Navigator.push(
@@ -72,16 +74,26 @@ class _BottomNavigatorState extends State<BottomNavigator> {
                 selectedLabelStyle: TextStyle(color: Colors.black),
                 items: [
                   BottomNavigationBarItem(
-                      icon: Icon(Icons.history,color: Colors.white,),
+                      icon: Icon(
+                        Icons.history,
+                        color: Colors.white,
+                      ),
                       title: Column(
                         children: <Widget>[
-                          Text('See Previous Detail',style: TextStyle(color: Colors.white)),
+                          Text('See Previous Detail',
+                              style: TextStyle(color: Colors.white)),
                         ],
                       )),
                   BottomNavigationBarItem(
-                      icon: Icon(Icons.video_label,color: Colors.white,),
+                      icon: Icon(
+                        Icons.video_label,
+                        color: Colors.white,
+                      ),
                       title: Column(
-                        children: <Widget>[Text("Demo or Video",style: TextStyle(color: Colors.white))],
+                        children: <Widget>[
+                          Text("Demo or Video",
+                              style: TextStyle(color: Colors.white))
+                        ],
                       )),
                 ],
               )),
@@ -107,45 +119,4 @@ class _BottomNavigatorState extends State<BottomNavigator> {
           context, MaterialPageRoute(builder: (context) => screen)),
     );
   }
-}
-
-class _DiamondBorder extends ShapeBorder {
-  const _DiamondBorder();
-
-  @override
-  ShapeBorder lerpFrom(ShapeBorder a ,double t){
-    return RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0));
-  }
-  @override
-  EdgeInsetsGeometry get dimensions {
-    return const EdgeInsets.only();
-  }
-
-  
-
-  @override
-  Path getInnerPath(Rect rect, {TextDirection textDirection}) {
-    return getOuterPath(rect, textDirection: textDirection);
-  }
-
-  @override
-  Path getOuterPath(Rect rect, {TextDirection textDirection}) {
-    return Path()
-      ..moveTo(rect.left + rect.width / 2.0, rect.top)
-      ..lineTo(rect.right, rect.top + rect.height / 2.0)
-      ..lineTo(rect.left + rect.width / 2.0, rect.bottom)
-      ..lineTo(rect.left, rect.top + rect.height / 2.0)
-      ..close();
-  }
-
-  @override
-  void paint(Canvas canvas, Rect rect, {TextDirection textDirection}) {}
-
-  // This border doesn't support scaling.
-  @override
-  ShapeBorder scale(double t) {
-    return null;
-  }
-
- 
 }

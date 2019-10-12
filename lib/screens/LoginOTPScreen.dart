@@ -69,9 +69,6 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
       } else {
         return false;
       }
-
-      // Navigator.of(context).pop();
-      // Navigator.of(context).pushReplacementNamed('/home');
     } catch (e) {
       handleError(e);
       return false;

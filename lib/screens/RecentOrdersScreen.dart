@@ -3,9 +3,11 @@ import 'package:occipital_tech/models/get_recent_orders.dart';
 import 'package:occipital_tech/models/orders_data.dart';
 import 'package:occipital_tech/screens/OrderDataTiles.dart';
 import 'package:occipital_tech/util/ApiClient.dart';
+import 'package:occipital_tech/util/AppDrawer.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:occipital_tech/util/colorValues.dart';
+
 class RecentOrdersScreen extends StatefulWidget {
   @override
   _RecentOrdersScreenState createState() => _RecentOrdersScreenState();
@@ -28,54 +30,83 @@ class _RecentOrdersScreenState extends State<RecentOrdersScreen> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final data = await ApiClient.getLastSomeOrders(
         GetRecentOrders(prefs.getString('phoneNo'), prefs.getString('token')));
-    print(data.orderIds);
     orders.add(data);
+  }
+
+  init() {
+    orders.add(null);
+    print(orders.value);
+    _getRecentOrders();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: StreamBuilder(
-      stream: orders,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final data = snapshot.data as OrdersData;
-          print(data.cities);
-          if (data.cities == null || data.cities.length==0) {
-            return Center(
-              child: Text('No orders found'),
-            );
-          }
-
-          return ListView.builder(
-            //padding: EdgeInsets.all(16.0),
-            itemCount: data.cities.length,
-            itemBuilder: (context, index) {
-              String status = "";
-              if (data.pdfStatuses[index] == 'True' &&
-                  data.commodityStatus[index] == 'True' &&
-                  data.markerStatuses[index] == 'True') {
-                status = 'Completed';
-              } else {
-                status = "Error";
+        appBar: AppBar(
+          actions: <Widget>[
+            StreamBuilder<Object>(
+              stream: orders,
+              builder: (context, snapshot) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 15.0),
+                  child:orders.value==null ? Center(child: Container(),): InkWell(onTap: () {
+                    init();
+                  }, child: Icon(Icons.refresh)),
+                );
               }
-              return OrderDataTiles(
-                  data.orderNumbers[index].toString(),
-                  data.cities[index],
-                  "$status",
-                  data.dates[index],
-                  data.months[index],
-                  data.commodities[index],
-                  data.orderIds[index].toString(),
-                  data.times[index],
-                  data.years[index]);
-            },
-          );
-        }
+            )
+          ],
+          iconTheme: IconThemeData(color: Colors.black),
+          elevation: 0.0,
+          title: Text(
+            'Home',
+            style: TextStyle(color: Colors.black),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.white,
+        ),
+        drawer: AppDrawer(),
+        body: StreamBuilder(
+          stream: orders,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final data = snapshot.data as OrdersData;
+              print(data.cities);
+              if (data.cities == null || data.cities.length == 0) {
+                return Center(
+                  child: Text('No orders found'),
+                );
+              }
 
-        return Center(child: CircularProgressIndicator());
-      },
-    ));
+              return ListView.builder(
+                //padding: EdgeInsets.all(16.0),
+                itemCount: data.cities.length,
+                itemBuilder: (context, index) {
+                  String status = "";
+                  if (data.pdfStatuses[index] == 'True' &&
+                      data.commodityStatus[index] == 'True' &&
+                      data.markerStatuses[index] == 'True') {
+                    status = 'Completed';
+                  } else {
+                    status = "Error";
+                  }
+                  return OrderDataTiles(
+                      data.orderNumbers[index].toString(),
+                      data.cities[index],
+                      "$status",
+                      data.dates[index],
+                      data.months[index],
+                      data.commodities[index],
+                      data.orderIds[index].toString(),
+                      data.times[index],
+                      data.years[index]);
+                },
+              );
+            }
+
+            return Center(child: CircularProgressIndicator());
+          },
+        ));
   }
 
   Widget locationTile(String location) {

@@ -50,31 +50,43 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               final order = snapshot.data as GetOrderData;
-              final colors = order.colors.forEach((String f) => f);
               print(order.toJson());
               return ListView(
                 padding: EdgeInsets.all(16.0),
                 children: <Widget>[
                   header(
-                      order.city,
-                      '${order.date}-${order.month}-${order.year}',
-                      order.time,
-                      order.ordernumber),
+                      order.city??'N/A',
+                      '${order.date ?? 'N/A'}-${order.month ?? 'NA'}-${order.year ?? 'N/A'}',
+                      order.time??'N/A',
+                      order.ordernumber??'N/A'),
                   SizedBox(height: 15.0),
                   Text('Average Details of All Images'),
                   SizedBox(height: 15.0),
                   sizeTable(),
-                  pieCharts(order.colorDetails[0]),
+                  SizedBox(height: 15.0),
+                  order.colorDetails == null
+                      ? Center(
+                          child: Text('No data available'),
+                        )
+                      : pieCharts(order.colorDetails[0]),
                   SizedBox(height: 15.0),
                   FlatButton(
-                    shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(30.0) ),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0)),
                     padding: EdgeInsets.all(16.0),
                     color: Color(0XFF01AF51),
-                    child: Text('Order Detail',style: TextStyle(color:Colors.white,fontSize: 16.0 ),),
-                  onPressed: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => OrderDetailScreen(order.imageURLs)));
-                  }
-                  ,)
+                    child: Text(
+                      'Order Detail',
+                      style: TextStyle(color: Colors.white, fontSize: 16.0),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  OrderDetailScreen(order.imageURLs)));
+                    },
+                  )
                   //defectsCard(order.defects[0]['Defective'])
                 ],
               );
@@ -186,23 +198,20 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
       colorList: [Colors.orange, Colors.red, Colors.yellow, Colors.green],
       showLegends: false,
       initialAngle: math.pi * 0.5,
-
     );
   }
 
-  Widget buildPieChart(){
+  Widget buildPieChart() {
     return SfCircularChart(
       series: [
         PieSeries(
-          // dataSource: 
-        )
+            // dataSource:
+            )
       ],
     );
   }
 
-  getColors(){
-
-  }
+  getColors() {}
 
   Widget defectsCard(double defect) {
     final _defectVal = num.parse((defect * 100).toStringAsFixed(0));
@@ -213,7 +222,7 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Text('Defects',style: TextStyle(fontSize: 16.0)),
+            Text('Defects', style: TextStyle(fontSize: 16.0)),
             Container(
               padding: EdgeInsets.all(10.0),
               width: 60.0,
@@ -243,11 +252,10 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
   }
 }
 
-
-class PieChartData{
+class PieChartData {
   final String value;
   final double percentage;
   final Color color;
 
-  PieChartData(this.color,this.percentage,this.value);
+  PieChartData(this.color, this.percentage, this.value);
 }
