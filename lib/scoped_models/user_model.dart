@@ -13,21 +13,26 @@ import 'package:shared_preferences/shared_preferences.dart';
 class UserModel extends Model {
   PublishSubject<bool> _userSubject = PublishSubject();
   PublishSubject<bool> _userExists = PublishSubject();
+  BehaviorSubject<bool> _loadingState = BehaviorSubject.seeded(false);
 
   User _authenticatedUser;
   bool isLoading = false;
-  ViewState _state;
+  ViewState _state=ViewState.Idle;
 
   //getters for private variables
   User get user => _authenticatedUser;
   PublishSubject<bool> get userSubject => _userSubject;
   PublishSubject<bool> get userExists => _userExists;
+  BehaviorSubject<bool>  get loadingState => _loadingState;
   ViewState get state => _state;
   Function get changeStateFunc => _setState;
 
 //Functions for login functionality
   Future<Map<String, dynamic>> checkUser(UserCheck user) async {
-    _setState(ViewState.Busy);
+    isLoading = true;
+    _loadingState.add(true);
+    notifyListeners();
+  //  _setState(ViewState.Busy);
     final response = await ApiClient.checkUser(user);
     print(response.toJson());
     if (response.resultCode == ResultCodes.successCode && response.token!=null) {
@@ -160,5 +165,6 @@ class UserModel extends Model {
   void close() {
     _userSubject.close();
     _userExists.close();
+    _loadingState.close();
   }
 }

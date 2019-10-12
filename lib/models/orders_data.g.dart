@@ -36,7 +36,7 @@ Map<String, dynamic> _$OrdersDataToJson(OrdersData instance) =>
       'OrderNumber': instance.orderNumbers,
       'PDFStatus': instance.pdfStatuses,
       'Time': instance.times,
-      'Years': instance.years,
+      'Year': instance.years,
       'ResultCode': instance.resultCode,
       'Status': instance.status,
     };

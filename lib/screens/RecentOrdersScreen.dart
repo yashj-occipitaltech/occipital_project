@@ -40,7 +40,8 @@ class _RecentOrdersScreenState extends State<RecentOrdersScreen> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final data = snapshot.data as OrdersData;
-          if (data.cities == null) {
+          print(data.cities);
+          if (data.cities == null || data.cities.length==0) {
             return Center(
               child: Text('No orders found'),
             );

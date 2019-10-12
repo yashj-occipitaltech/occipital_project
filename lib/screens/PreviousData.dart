@@ -95,7 +95,7 @@ class _PreviousDataState extends State<PreviousData> {
                 return snapshot.hasData
                     ? data.cities == null
                         ? Center(
-                            child: Text('Nothing here'),
+                            child: Text('No orders found '),
                           )
                         : makeTiles(data)
                     : Center(

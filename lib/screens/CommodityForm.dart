@@ -9,6 +9,7 @@ import 'package:occipital_tech/screens/HomePage.dart';
 import 'package:occipital_tech/util/ApiClient.dart';
 import 'package:occipital_tech/util/consts.dart';
 import 'package:occipital_tech/util/widgets.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -37,14 +38,28 @@ class _CommodityFormState extends State<CommodityForm> {
     images.close();
   }
 
+  Future<String> get _localPath async {
+  final directory = await getApplicationDocumentsDirectory();
+
+  return directory.path;
+}
+
+Future<File> get _localFile async {
+  final path = await _localPath;
+
+  _images.forEach((f){
+    f.path;
+  });
+  return File('$path/uploads');
+}
+
   Future<void> addImagesToList() async {
-    print(_images.length);
     File selected = await ImagePicker.pickImage(source: ImageSource.camera);
-   
-   
+                    
     if (selected != null) {
        String fileName = selected.path.split('/').last;
         print(fileName);
+        print(selected.path);
       _images.add(selected);
       print(_images);
       images.add(_images);
@@ -90,16 +105,6 @@ class _CommodityFormState extends State<CommodityForm> {
                           prefs.getString('userType'),
                           prefs.getString('token')),
                       _images);
-                print( UploadOrder(
-                          prefs.getString('phoneNo'),
-                          DateFormat("H:m:s").format(now),
-                          now.day.toString(),
-                          now.month.toString(),
-                          now.year.toString(),
-                          "Mumbai",
-                          _value,
-                          prefs.getString('userType'),
-                          prefs.getString('token')).toJson());
                  Navigator.pushReplacementNamed(context, '/home');
                  print(answer.toJson());     
                 }

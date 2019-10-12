@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'dart:math' as math;
 import 'package:occipital_tech/util/colorValues.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class OrderResultScreen extends StatefulWidget {
   final String orderId;
@@ -49,6 +50,8 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               final order = snapshot.data as GetOrderData;
+              final colors = order.colors.forEach((String f) => f);
+              print(order.toJson());
               return ListView(
                 padding: EdgeInsets.all(16.0),
                 children: <Widget>[
@@ -183,7 +186,22 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
       colorList: [Colors.orange, Colors.red, Colors.yellow, Colors.green],
       showLegends: false,
       initialAngle: math.pi * 0.5,
+
     );
+  }
+
+  Widget buildPieChart(){
+    return SfCircularChart(
+      series: [
+        PieSeries(
+          // dataSource: 
+        )
+      ],
+    );
+  }
+
+  getColors(){
+
   }
 
   Widget defectsCard(double defect) {
@@ -223,4 +241,13 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
       ],
     );
   }
+}
+
+
+class PieChartData{
+  final String value;
+  final double percentage;
+  final Color color;
+
+  PieChartData(this.color,this.percentage,this.value);
 }

@@ -29,7 +29,6 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
   }
 
   Future<void> verifyPhone() async {
-    //locator<UserModel>().changeStateFunc(ViewState.Busy);
     final PhoneCodeSent smsOTPSent = (String verId, [int forceCodeResend]) {
       this.verificationId = verId;
       smsOTPDialog(context).then((value) {
@@ -55,7 +54,7 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
     }
   }
 
-  signIn() async {
+  Future<bool> signIn() async {
     try {
       final AuthCredential credential = PhoneAuthProvider.getCredential(
         verificationId: verificationId,
@@ -65,10 +64,17 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
           (await _auth.signInWithCredential(credential)).user;
       final FirebaseUser currentUser = await _auth.currentUser();
       assert(user.uid == currentUser.uid);
-      Navigator.of(context).pop();
-      Navigator.of(context).pushReplacementNamed('/home');
+      if (user.uid == currentUser.uid) {
+        return true;
+      } else {
+        return false;
+      }
+
+      // Navigator.of(context).pop();
+      // Navigator.of(context).pushReplacementNamed('/home');
     } catch (e) {
       handleError(e);
+      return false;
     }
   }
 
@@ -80,6 +86,7 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
         setState(() {
           errorMessage = 'Invalid Code';
         });
+        Fluttertoast.showToast(msg: errorMessage, gravity: ToastGravity.CENTER);
         Navigator.of(context).pop();
         smsOTPDialog(context).then((value) {
           print('sign in');
@@ -89,6 +96,7 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
         setState(() {
           errorMessage = error.message;
         });
+        Fluttertoast.showToast(msg: errorMessage, gravity: ToastGravity.CENTER);
 
         break;
     }
@@ -96,15 +104,12 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ScopedModel(
-      model: locator<UserModel>(),
-      child: ScopedModelDescendant(
-        builder: (context, child, UserModel model) => Scaffold(
-          body: Form(
-            key: _formKeyOTP,
-            child: ListView(
-              children: <Widget>[loginView(model)],
-            ),
+    return ScopedModelDescendant(
+      builder: (context, _, UserModel model) => Scaffold(
+        body: Form(
+          key: _formKeyOTP,
+          child: ListView(
+            children: <Widget>[loginView(model)],
           ),
         ),
       ),
@@ -163,28 +168,35 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
                 height: 10.0,
               ),
               Center(
-                child: RaisedButton(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0)),
-                  padding: EdgeInsets.all(16.0),
-                  child: model.state == ViewState.Busy
-                      ? CircularProgressIndicator()
-                      : Text(
-                          'Ok',
-                          style: TextStyle(fontSize: 16.0),
-                        ),
-                  onPressed: () async {
-                    final user = await _auth.currentUser();
-                    if (smsOTP.isEmpty || smsOTP.length < 6) {
-                      Fluttertoast.showToast(msg: 'Please enter the OTP');
-                      setState(() {
-                        hasError = true;
-                      });
-                    } else {
-                      _onButtonPressed(user);
-                    }
-                  },
-                ),
+                child: StreamBuilder<Object>(
+                    stream: model.loadingState,
+                    builder: (context, snapshot) {
+                      return FlatButton(
+                        color: Color(0XFF01AF51),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15.0)),
+                        padding: EdgeInsets.all(16.0),
+                        child: model.state == ViewState.Busy
+                            ? CircularProgressIndicator()
+                            : Text(
+                                'OK',
+                                style: TextStyle(
+                                    fontSize: 16.0, color: Colors.white),
+                              ),
+                        onPressed: () async {
+                          final user = await _auth.currentUser();
+                          if (smsOTP.isEmpty || smsOTP.length < 6) {
+                            Fluttertoast.showToast(msg: 'Please enter the OTP');
+                            setState(() {
+                              hasError = true;
+                            });
+                          } else {
+                            _onButtonPressed(user);
+                            print(model.loadingState.value.toString());
+                          }
+                        },
+                      );
+                    }),
               ),
               SizedBox(
                 height: 10.0,
@@ -213,25 +225,31 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
   }
 
   Widget submitButton(UserModel model) {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: RawMaterialButton(
-        onPressed: () {
-          if (_formKeyOTP.currentState.validate()) {
-            _formKeyOTP.currentState.save();
-            verifyPhone();
-          }
-        },
-        child: Icon(
-          Icons.arrow_forward_ios,
-          color: Colors.white,
-          size: 25.0,
-        ),
-        shape: CircleBorder(),
-        elevation: 2.0,
-        fillColor: Colors.green,
-        padding: EdgeInsets.all(15.0),
-      ),
+    return ScopedModelDescendant(
+      builder: (context, _, UserModel model) {
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: model.isLoading
+              ? CircularProgressIndicator()
+              : RawMaterialButton(
+                  onPressed: () {
+                    if (_formKeyOTP.currentState.validate()) {
+                      _formKeyOTP.currentState.save();
+                      verifyPhone();
+                    }
+                  },
+                  child: Icon(
+                    Icons.arrow_forward_ios,
+                    size: 25.0,
+                    color: Colors.white,
+                  ),
+                  shape: CircleBorder(),
+                  elevation: 2.0,
+                  fillColor: Colors.green,
+                  padding: EdgeInsets.all(15.0),
+                ),
+        );
+      },
     );
   }
 
@@ -293,21 +311,24 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
   }
 
   _onButtonPressed(FirebaseUser user) async {
-    final UserModel model = locator<UserModel>();
-    final user = await _auth.currentUser();
-    if (user != null) {
-      model.storePhoneNo(phoneNo.substring(3));
-      final response = await model.checkUser(UserCheck(phoneNo.substring(3)));
-      if (response['success'] == 'True') {
-        Navigator.pushNamed(context, '/signup');
-      } else if (response['success'] == 'Error' ||
-          response['resultCode'] == 2) {
-        Fluttertoast.showToast(msg: 'Some error occured.Please try again');
-      } else {
-        Navigator.pushReplacementNamed(context, '/home');
+    final userVerified = await signIn();
+
+    if (userVerified == true) {
+      final UserModel model = locator<UserModel>();
+      final user = await _auth.currentUser();
+      if (user != null) {
+        model.storePhoneNo(phoneNo.substring(3));
+        final response = await model.checkUser(UserCheck(phoneNo.substring(3)));
+        if (response['success'] == 'True') {
+          Navigator.pushNamed(context, '/signup');
+        } else if (response['success'] == 'Error' ||
+            response['resultCode'] == 2) {
+          Navigator.of(context).pop();
+          Fluttertoast.showToast(msg: 'Some error occured.Please try again');
+        } else {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       }
-    } else {
-      signIn();
     }
   }
 }

@@ -40,6 +40,10 @@ class GetOrderData {
   List<List> frequencyArray;
   @JsonKey(name: 'PDFPath')
   String pdfPath;
+  @JsonKey(name: 'Colors')
+  List<String> colors;
+  @JsonKey(name: 'ColorRGB')
+  Map<String,List<int>> colorRGB;
   @JsonKey(name: 'Defects')
   List<Map<String, dynamic>> defects;
   @JsonKey(name: 'Status')
@@ -66,6 +70,8 @@ class GetOrderData {
       this.range,
       this.frequencyArray,
       this.pdfPath,
+      this.colorRGB,
+      this.colors,
       this.defects,
       this.status,
       this.resultCode);

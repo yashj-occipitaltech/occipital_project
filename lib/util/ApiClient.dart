@@ -61,6 +61,8 @@ class ApiClient {
     final uploader = FlutterUploader();
     String fileName = images[0].path.split('/').last;
     final Directory dir = await getApplicationDocumentsDirectory();
+    final url = 'http://35.200.246.43${ApiEndpoints.uploadImages}';
+    print(url);
       final String savedDir = '/storage/emulated/0/Android/data/com.occipitaltech.agrograde/files/Pictures/';
       print('---->');
       
@@ -68,27 +70,28 @@ class ApiClient {
       print(savedDir);
       print('---->');
     final task = uploader.enqueue(
-      url: '35.200.246.43 + ${ApiEndpoints.getOrderIds}',
+      url: url,
       method: UploadMethod.POST,
       files: [
         FileItem(
             filename: fileName,
-            fieldname: 'files',
+            fieldname: 'uploads',
             savedDir: savedDir),
       ],
       data: order.toJson().cast<String,String>(),
     );
 
     final subscription = uploader.progress.listen((progress) {
-      print(progress);
+     // print(progress);
       //... code to handle progress
     });
     
-    print(subscription);
+   // print(subscription);
+
     final uploadRequest = await dio.post(
         '${ApiEndpoints.baseUrl + ApiEndpoints.getOrderIds}',
         options: Options(method: 'POST'),
-        data: FormData.fromMap({"files": images}));
+        data: FormData.fromMap({"uploads[]": ['/storage/emulated/0/Android/data/com.occipitaltech.agrograde/files/Pictures/']}));
 
     final response = await http.post(
         ApiEndpoints.baseUrl + ApiEndpoints.getOrderIds,
