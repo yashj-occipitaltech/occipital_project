@@ -45,6 +45,8 @@ dependencies:
   data_connection_checker: ^0.3.4
   syncfusion_flutter_charts: ^17.3.14
   share: ^0.6.2+3
+  url_launcher: ^5.1.6
+  open_file: ^2.0.3
 
 dev_dependencies:
   build_runner: ^1.7.1

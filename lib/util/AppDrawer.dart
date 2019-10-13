@@ -81,7 +81,7 @@ class _AppDrawerState extends State<AppDrawer> {
           )
         ],
       ),
-      onTap: () => Navigator.pushReplacement(
+      onTap: () => Navigator.push(
           context, MaterialPageRoute(builder: (context) => screen)),
     );
   }

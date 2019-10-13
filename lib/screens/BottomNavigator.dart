@@ -31,76 +31,73 @@ class _BottomNavigatorState extends State<BottomNavigator> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => true,
-      child: Scaffold(
-          appBar: appBarTitle == "Home"
-              ? null
-              : Widgets.appBar(appBarTitle,
-                  showRefresh: appBarTitle == "Home" ? true : false),
-          drawer: AppDrawer(),
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
-          floatingActionButton: FloatingActionButton(
-            backgroundColor: Color(0XFF01AF51),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => CommodityForm()),
-            ),
-            child: Icon(
-              Icons.add,
-              size: 30.0,
-            ),
-            elevation: 2.0,
-            tooltip: 'New Data',
+    return Scaffold(
+        appBar: appBarTitle == "Home"
+            ? null
+            : Widgets.appBar(appBarTitle,
+                showRefresh: appBarTitle == "Home" ? true : false),
+        drawer: AppDrawer(),
+        floatingActionButtonLocation:
+            FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Color(0XFF01AF51),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CommodityForm()),
           ),
-          bottomNavigationBar: BottomAppBar(
-              //color: Theme.of(context).bottomAppBarColor,
-              clipBehavior: Clip.antiAlias,
-              shape: CircularNotchedRectangle(),
-              notchMargin: 8.0,
-              child: BottomNavigationBar(
-                backgroundColor: Color(0XFF01AF51),
-                selectedItemColor: Colors.black54,
-                currentIndex: _currentIndex,
-                onTap: (int index) {
-                  setState(() {
-                    _currentIndex = index;
-                    index == 0
-                        ? setAppBarTitle('See Previous Detail')
-                        : setAppBarTitle('Demo Video');
-                  });
-                },
-                selectedLabelStyle: TextStyle(color: Colors.black),
-                items: [
-                  BottomNavigationBarItem(
-                      icon: Icon(
-                        Icons.history,
-                        color: Colors.white,
-                      ),
-                      title: Column(
-                        children: <Widget>[
-                          Text('See Previous Detail',
-                              style: TextStyle(color: Colors.white)),
-                        ],
-                      )),
-                  BottomNavigationBarItem(
-                      icon: Icon(
-                        Icons.video_label,
-                        color: Colors.white,
-                      ),
-                      title: Column(
-                        children: <Widget>[
-                          Text("Demo or Video",
-                              style: TextStyle(color: Colors.white))
-                        ],
-                      )),
-                ],
-              )),
-          body: appBarTitle == 'Home'
-              ? RecentOrdersScreen()
-              : _children[_currentIndex]),
-    );
+          child: Icon(
+            Icons.add,
+            size: 30.0,
+          ),
+          elevation: 2.0,
+          tooltip: 'New Data',
+        ),
+        bottomNavigationBar: BottomAppBar(
+            //color: Theme.of(context).bottomAppBarColor,
+            clipBehavior: Clip.antiAlias,
+            shape: CircularNotchedRectangle(),
+            notchMargin: 8.0,
+            child: BottomNavigationBar(
+              backgroundColor: Color(0XFF01AF51),
+              selectedItemColor: Colors.black54,
+              currentIndex: _currentIndex,
+              onTap: (int index) {
+                setState(() {
+                  _currentIndex = index;
+                  index == 0
+                      ? setAppBarTitle('See Previous Detail')
+                      : setAppBarTitle('Demo Video');
+                });
+              },
+              selectedLabelStyle: TextStyle(color: Colors.black),
+              items: [
+                BottomNavigationBarItem(
+                    icon: Icon(
+                      Icons.history,
+                      color: Colors.white,
+                    ),
+                    title: Column(
+                      children: <Widget>[
+                        Text('See Previous Detail',
+                            style: TextStyle(color: Colors.white)),
+                      ],
+                    )),
+                BottomNavigationBarItem(
+                    icon: Icon(
+                      Icons.video_label,
+                      color: Colors.white,
+                    ),
+                    title: Column(
+                      children: <Widget>[
+                        Text("Demo or Video",
+                            style: TextStyle(color: Colors.white))
+                      ],
+                    )),
+              ],
+            )),
+        body: appBarTitle == 'Home'
+            ? RecentOrdersScreen()
+            : _children[_currentIndex]);
   }
 
   Widget drawerTiles(String name, Widget screen, IconData iconName) {

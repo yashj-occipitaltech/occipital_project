@@ -1,9 +1,13 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:occipital_tech/models/upload_images_response.dart';
 import 'package:occipital_tech/models/upload_order.dart';
 import 'package:occipital_tech/screens/HomePage.dart';
 import 'package:occipital_tech/util/ApiClient.dart';
@@ -21,11 +25,13 @@ class CommodityForm extends StatefulWidget {
 class _CommodityFormState extends State<CommodityForm> {
   String _value = 'Onion';
 
-  String _description= '';
+  String _description = '';
 
   List<File> _images = List<File>();
 
   BehaviorSubject<List<File>> images = BehaviorSubject<List<File>>();
+
+  BehaviorSubject progressValue = BehaviorSubject();
 
   final _formKeyCommodity = GlobalKey<FormState>();
   final now = DateTime.now();
@@ -38,30 +44,31 @@ class _CommodityFormState extends State<CommodityForm> {
   void dispose() {
     super.dispose();
     images.close();
+    progressValue.close();
   }
 
   Future<String> get _localPath async {
-  final directory = await getApplicationDocumentsDirectory();
+    final directory = await getApplicationDocumentsDirectory();
 
-  return directory.path;
-}
+    return directory.path;
+  }
 
-Future<File> get _localFile async {
-  final path = await _localPath;
+  Future<File> get _localFile async {
+    final path = await _localPath;
 
-  _images.forEach((f){
-    f.path;
-  });
-  return File('$path/uploads');
-}
+    _images.forEach((f) {
+      f.path;
+    });
+    return File('$path/uploads');
+  }
 
   Future<void> addImagesToList() async {
     File selected = await ImagePicker.pickImage(source: ImageSource.camera);
-                    
+
     if (selected != null) {
-       String fileName = selected.path.split('/').last;
-        print(fileName);
-        print(selected.path);
+      String fileName = selected.path.split('/').last;
+      print(fileName);
+      print(selected.path);
       _images.add(selected);
       print(_images);
       images.add(_images);
@@ -95,7 +102,7 @@ Future<File> get _localFile async {
                 } else {
                   final SharedPreferences prefs =
                       await SharedPreferences.getInstance();
-                  final answer = await ApiClient.uploadImages(
+                  final response = await uploadImages(
                       UploadOrder(
                           prefs.getString('phoneNo'),
                           DateFormat("H:m:s").format(now),
@@ -106,11 +113,8 @@ Future<File> get _localFile async {
                           _value,
                           prefs.getString('userType'),
                           prefs.getString('token'),
-                          _description
-                          ),
+                          _description),
                       _images);
-                 Navigator.pushReplacementNamed(context, '/home');
-                 print(answer.toJson());     
                 }
               },
               child: Icon(Icons.check),
@@ -127,8 +131,8 @@ Future<File> get _localFile async {
             _itemDown(),
             labelText('Description:'),
             TextFormField(
-              onChanged: (String val){
-                _description =val;
+              onChanged: (String val) {
+                _description = val;
               },
               maxLines: 5,
               decoration: InputDecoration(
@@ -262,5 +266,82 @@ Future<File> get _localFile async {
         ),
       ),
     );
+  }
+
+  Future<Null> _uploadDialog(BuildContext context) async {
+    return await showDialog<Null>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return WillPopScope(
+                      onWillPop: ()async => false,
+                      child: AlertDialog(
+              elevation: 0.0,
+             // backgroundColor: Colors.transparent,
+              contentPadding: EdgeInsets.all(16.0),
+              content: Column(
+                mainAxisSize:MainAxisSize.min ,
+                children: <Widget>[
+                  Row(
+                      children: <Widget>[
+                        Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                        SizedBox(
+                          width: 10.0,
+                        ),
+                        Text('Uploading '),
+                        StreamBuilder<Object>(
+                            stream: progressValue,
+                            builder: (context, snapshot) {
+                              return Text('${snapshot.data.toString()}%');
+                            })
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  Future uploadImages(UploadOrder order, List<File> images) async {
+    final uploader = FlutterUploader();
+    String fileName = images[0].path.split('/').last;
+    final Directory dir = await getApplicationDocumentsDirectory();
+    final url = 'http://34.93.237.2${ApiEndpoints.uploadImages}';
+    print(url);
+    final String savedDir =
+        '/storage/emulated/0/Android/data/com.occipitaltech.agrograde/files/Pictures/';
+    print('---->');
+
+    print(fileName);
+    print(savedDir);
+    print('---->');
+    final task = await uploader.enqueue(
+      url: url,
+      method: UploadMethod.POST,
+      files: [
+        FileItem(filename: fileName, fieldname: 'uploads', savedDir: savedDir),
+      ],
+      data: order.toJson().cast<String, String>(),
+    );
+    _uploadDialog(context);
+    final progressListener = uploader.progress.listen((progress) {
+      progressValue.add(progress.progress.toString());
+    });
+    final subscription = uploader.result.listen((result) {
+      if (result.statusCode == 200 && result.status.value == 3) {
+        Fluttertoast.showToast(msg: 'Successfully Uploaded');
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+      //... code to handle result
+    }, onError: (ex, stacktrace) {
+      print('From errpr');
+      print(ex);
+     Navigator.pushReplacementNamed(context, '/home');
+      Fluttertoast.showToast(msg: 'Some error occured.Please try again');
+      // ... code to handle error
+    });
   }
 }

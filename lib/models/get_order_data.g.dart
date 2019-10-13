@@ -31,10 +31,14 @@ GetOrderData _$GetOrderDataFromJson(Map<String, dynamic> json) {
     (json['FrequencyArray'] as List)?.map((e) => e as List)?.toList(),
     json['PDFPath'] as String,
     (json['ColorRGB'] as Map<String, dynamic>)?.map(
-      (k, e) => MapEntry(k, (e as List)?.map((e) => e as int)?.toList()),
+      (k, e) => MapEntry(k, e as String),
     ),
     (json['Colors'] as List)?.map((e) => e as String)?.toList(),
-    (json['Defects'] as List)?.map((e) => e as Map<String, dynamic>)?.toList(),
+    (json['Defects'] as List)
+        ?.map((e) => (e as Map<String, dynamic>)?.map(
+              (k, e) => MapEntry(k, e as String),
+            ))
+        ?.toList(),
     json['Status'] as String,
     json['ResultCode'] as String,
   );

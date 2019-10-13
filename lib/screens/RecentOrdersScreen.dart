@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:occipital_tech/models/get_recent_orders.dart';
+import 'package:occipital_tech/models/order_status_check.dart';
+import 'package:occipital_tech/models/order_status_result.dart';
 import 'package:occipital_tech/models/orders_data.dart';
 import 'package:occipital_tech/screens/OrderDataTiles.dart';
 import 'package:occipital_tech/util/ApiClient.dart';
@@ -15,14 +19,20 @@ class RecentOrdersScreen extends StatefulWidget {
 
 class _RecentOrdersScreenState extends State<RecentOrdersScreen> {
   final BehaviorSubject orders = BehaviorSubject();
+  Timer timer;
 
   void initState() {
     super.initState();
+    
+    // timer = Timer.periodic(Duration(seconds: 5), (Timer t) => init());
+    // print(timer.tick.toString());
     _getRecentOrders();
+    _checkOrderStatus();
   }
 
   void dispose() {
     super.dispose();
+    timer?.cancel();
     orders.close();
   }
 
@@ -31,11 +41,20 @@ class _RecentOrdersScreenState extends State<RecentOrdersScreen> {
     final data = await ApiClient.getLastSomeOrders(
         GetRecentOrders(prefs.getString('phoneNo'), prefs.getString('token')));
     orders.add(data);
+
+  }
+
+  _checkOrderStatus()async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final OrderStatusResult data = await ApiClient.checkStatus(
+        OrderStatusCheck('7208073319-6EMDH8A5', prefs.getString('token')));
+      
+    // print(data)    
+   // orders.add(data);
   }
 
   init() {
     orders.add(null);
-    print(orders.value);
     _getRecentOrders();
   }
 
@@ -78,7 +97,6 @@ class _RecentOrdersScreenState extends State<RecentOrdersScreen> {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 final data = snapshot.data as OrdersData;
-                print(data.cities);
                 if (data.cities == null || data.cities.length == 0) {
                   return Center(
                     child: Text('No orders found'),

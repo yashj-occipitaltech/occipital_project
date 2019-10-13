@@ -43,9 +43,9 @@ class GetOrderData {
   @JsonKey(name: 'Colors')
   List<String> colors;
   @JsonKey(name: 'ColorRGB')
-  Map<String,List<int>> colorRGB;
+  Map<String,String> colorRGB;
   @JsonKey(name: 'Defects')
-  List<Map<String, dynamic>> defects;
+  List<Map<String, String>> defects;
   @JsonKey(name: 'Status')
   String status;
   @JsonKey(name: 'ResultCode')

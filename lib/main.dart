@@ -70,8 +70,8 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    showPrefs();
-    print(_isDeviceConnected);
+    //showPrefs();
+    //print(_isDeviceConnected);
     return ScopedModel<UserModel>(
         model: locator<UserModel>(),
         child: MaterialApp(

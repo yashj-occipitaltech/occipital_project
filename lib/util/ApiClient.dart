@@ -8,6 +8,7 @@ import 'package:occipital_tech/models/get_orderId.dart';
 import 'package:occipital_tech/models/get_order_data.dart';
 import 'package:occipital_tech/models/get_recent_orders.dart';
 import 'package:occipital_tech/models/order_status_check.dart';
+import 'package:occipital_tech/models/order_status_result.dart';
 import 'package:occipital_tech/models/orders_data.dart';
 import 'package:occipital_tech/models/store_user.dart';
 import 'package:occipital_tech/models/upload_images_response.dart';
@@ -25,7 +26,7 @@ class ApiClient {
     final response = await http.post(
         ApiEndpoints.baseUrl + ApiEndpoints.checkUser,
         body: json.encode(user));
-    print(response.body.toString());
+    //print(response.body.toString());
     return UserCheckStatus.fromJson(json.decode(response.body));
   }
 
@@ -50,7 +51,7 @@ class ApiClient {
         ApiEndpoints.baseUrl + ApiEndpoints.getOrderIds,
         body: json.encode(data));
 
-    print(response.body.toString());
+    //print(response.body.toString());
 
     return OrdersData.fromJson(json.decode(response.body));
   }
@@ -69,7 +70,7 @@ class ApiClient {
       print(fileName);
       print(savedDir);
       print('---->');
-    final task = uploader.enqueue(
+    final task = await uploader.enqueue(
       url: url,
       method: UploadMethod.POST,
       files: [
@@ -80,11 +81,12 @@ class ApiClient {
       ],
       data: order.toJson().cast<String,String>(),
     );
-
-    final subscription = uploader.progress.listen((progress) {
-     // print(progress);
-      //... code to handle progress
-    });
+    print('--------------------------------------------------------------------------------->');
+    print(task);
+    // final subscription = uploader.progress.listen((progress) {
+    //  // print(progress);
+    //   //... code to handle progress
+    // });
     
    // print(subscription);
 
@@ -97,21 +99,21 @@ class ApiClient {
         ApiEndpoints.baseUrl + ApiEndpoints.getOrderIds,
         body: json.encode(order));
 
-    print(uploadRequest.data.toString());
+   // print(uploadRequest.data.toString());
     // print(response.body.toString());
 
     return UploadImagesResponse.fromJson(json.decode(response.body));
   }
 
-  static Future<OrderStatusCheck> checkStatus(
+  static Future<OrderStatusResult> checkStatus(
       OrderStatusCheck orderStatus) async {
     final response = await http.post(
         ApiEndpoints.baseUrl + ApiEndpoints.checkOrderStatus,
         body: json.encode(orderStatus));
 
-    print(response.body.toString());
+   
 
-    return OrderStatusCheck.fromJson(json.decode(response.body));
+    return OrderStatusResult.fromJson(json.decode(response.body));
   }
 
   static Future<GetOrderData> getOrderData(OrderStatusCheck order) async {
@@ -119,7 +121,7 @@ class ApiClient {
         ApiEndpoints.baseUrl + ApiEndpoints.getOrderData,
         body: json.encode(order));
 
-    print(response.body.toString());
+  //  print(response.body.toString());
 
     return GetOrderData.fromJson(json.decode(response.body));
   }
@@ -129,7 +131,7 @@ class ApiClient {
         ApiEndpoints.baseUrl + ApiEndpoints.getLastSomeOrders,
         body: json.encode(order));
 
-    print(response.body.toString());
+  //  print(response.body.toString());
 
     return OrdersData.fromJson(json.decode(response.body));
   }

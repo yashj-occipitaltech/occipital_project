@@ -1,4 +1,5 @@
 // import 'package:fl_chart/fl_chart.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:occipital_tech/models/get_order_data.dart';
 import 'package:occipital_tech/models/order_status_check.dart';
@@ -6,6 +7,8 @@ import 'package:occipital_tech/models/orders_data.dart';
 import 'package:occipital_tech/screens/OrderDetailScreen.dart';
 import 'package:occipital_tech/util/ApiClient.dart';
 import 'package:occipital_tech/util/widgets.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,6 +32,45 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
     _getOrderData();
   }
 
+  bool downloading = false;
+  var progressString = "";
+
+  String fileUrl = '';
+
+  Future<void> downloadFile(String url) async {
+    Dio dio = Dio();
+
+    try {
+      var dir = await getApplicationDocumentsDirectory();
+      print(dir.path);
+      print(url);
+      await dio.download(url, "${dir.path}/url.pdf",
+          onReceiveProgress: (rec, total) {
+        // print("Rec: $rec , Total: $total");
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          fileUrl = "${dir.path}/url.pdf";
+          downloading = true;
+          progressString = ((rec / total) * 100).toStringAsFixed(0) + "%";
+        });
+      });
+    } catch (e) {
+      print(e);
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      downloading = false;
+      progressString = "Completed";
+    });
+    print("Download completed");
+  }
+
   void dispose() {
     super.dispose();
     orderData.close();
@@ -46,59 +88,105 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
     // print(orderData.orderId);
     return Scaffold(
       appBar: AppBar(
-        iconTheme:  IconThemeData(color: Colors.black),
-      elevation: 0.0,
-      title: Text('Order Detail',style: TextStyle(color: Colors.black),),
-      centerTitle: true,
-      backgroundColor: Colors.white,
+        iconTheme: IconThemeData(color: Colors.black),
+        elevation: 0.0,
+        title: Text(
+          'Order Detail',
+          style: TextStyle(color: Colors.black),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
         actions: <Widget>[
           StreamBuilder<Object>(
-            stream: orderData,
-            builder: (context, snapshot) {
-              if(snapshot.hasData){
-                final data = snapshot.data as GetOrderData;
-                return InkWell(child: Padding(
-                  padding: const EdgeInsets.only(right:15.0),
-                  child: Icon(Icons.share),
-                ),onTap: (){
-                Share.share(data.pdfPath);
-              },);
-              }
-              return Container();
-            }
-          ),
+              stream: orderData,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final data = snapshot.data as GetOrderData;
+                  return data.pdfPath != null
+                      ? InkWell(
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 15.0),
+                            child: Icon(Icons.share),
+                          ),
+                          onTap: () {
+                            Share.share(data.pdfPath);
+                          },
+                        )
+                      : Container();
+                }
+                return Container();
+              }),
           StreamBuilder<Object>(
-            stream: orderData,
-            builder: (context, snapshot) {
-              if(snapshot.hasData){
-                final data = snapshot.data as GetOrderData;
-                return InkWell(child: Padding(
-                  padding: const EdgeInsets.only(right:15.0),
-                  child: Icon(Icons.file_download),
-                ),onTap: (){
-               // Share.share(data.pdfPath);
-              },);
-              }
-              return Container();
-            }
-          ),
-
+              stream: orderData,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final data = snapshot.data as GetOrderData;
+                  return data.pdfPath != null
+                      ? InkWell(
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 15.0),
+                            child: Icon(Icons.file_download),
+                          ),
+                          onTap: () async {
+                            await downloadFile(data.pdfPath);
+                          },
+                        )
+                      : Container();
+                }
+                return Container();
+              }),
         ],
       ),
+      bottomNavigationBar: downloading == true
+          ? Container(
+              decoration: BoxDecoration(
+                  border: Border(top: BorderSide(color: Colors.black26))),
+              padding: EdgeInsets.all(16.0),
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height * 0.07,
+              child: Row(
+                children: <Widget>[
+                  Center(child: CircularProgressIndicator()),
+                  SizedBox(
+                    width: 10.0,
+                  ),
+                  Text('Donwloading file: $progressString'),
+                ],
+              ),
+            )
+          : progressString == 'Completed'
+              ? InkWell(
+                  onTap: () {
+                    OpenFile.open(fileUrl);
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                        border: Border(top: BorderSide(color: Colors.black26))),
+                    padding: EdgeInsets.all(16.0),
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height * 0.07,
+                    child: Text('Open Pdf',
+                        style: TextStyle(
+                            decoration: TextDecoration.underline,
+                            color: Colors.blue[800],
+                            fontSize: 16.0)),
+                  ),
+                )
+              : SizedBox(),
       body: StreamBuilder<Object>(
           stream: orderData,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               final order = snapshot.data as GetOrderData;
-            //  print(order.toJson());
+              //  print(order.toJson());
               return ListView(
                 padding: EdgeInsets.all(16.0),
                 children: <Widget>[
                   header(
-                      order.city??'N/A',
+                      order.city ?? 'N/A',
                       '${order.date ?? 'N/A'}-${order.month ?? 'NA'}-${order.year ?? 'N/A'}',
-                      order.time??'N/A',
-                      order.ordernumber??'N/A'),
+                      order.time ?? 'N/A',
+                      order.ordernumber ?? 'N/A'),
                   SizedBox(height: 15.0),
                   Text('Average Details of All Images'),
                   SizedBox(height: 15.0),
