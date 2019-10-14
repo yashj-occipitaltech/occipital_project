@@ -43,14 +43,15 @@ class GetOrderData {
   @JsonKey(name: 'Colors')
   List<String> colors;
   @JsonKey(name: 'ColorRGB')
-  Map<String,dynamic> colorRGB;
+  Map<String,String> colorRGB;
   @JsonKey(name: 'Defects')
-  List<Map<String, int>> defects;
+  List<Map<String, num>> defects;
   @JsonKey(name: 'Status')
   String status;
   @JsonKey(name: 'ResultCode')
   String resultCode;
-
+  @JsonKey(name: 'TotalDefects')
+  List<String> totalDefects;
   GetOrderData(
       this.orderId,
       this.userName,
@@ -74,7 +75,9 @@ class GetOrderData {
       this.colors,
       this.defects,
       this.status,
-      this.resultCode);
+      this.resultCode,
+      this.totalDefects
+      );
 
   factory GetOrderData.fromJson(Map<String, dynamic> json) =>
       _$GetOrderDataFromJson(json);

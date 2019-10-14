@@ -323,7 +323,7 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
           Navigator.of(context).pop();
           Fluttertoast.showToast(msg: 'Some error occured.Please try again');
         } else {
-          Navigator.of(context).popUntil((route) => route.isFirst);
+         // Navigator.of(context).popUntil((route) => route.isFirst);
           Navigator.of(context).pushReplacementNamed('/home');
         }
       }

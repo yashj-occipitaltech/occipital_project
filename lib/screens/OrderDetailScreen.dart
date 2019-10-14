@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_image/network.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:occipital_tech/models/get_order_data.dart';
 import 'package:occipital_tech/util/widgets.dart';
 import 'package:occipital_tech/util/colorValues.dart';
+
 class OrderDetailScreen extends StatefulWidget {
-  final List<String> imageUrls;
-  OrderDetailScreen(this.imageUrls);
+  final GetOrderData orderData;
+  OrderDetailScreen(this.orderData);
 
   @override
   _OrderDetailScreenState createState() => _OrderDetailScreenState();
@@ -13,6 +15,7 @@ class OrderDetailScreen extends StatefulWidget {
 
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   int _selectedTab = 1;
+  int indexImg = 0;
 
   changeSelectedTab(int tab) {
     setState(() {
@@ -34,13 +37,21 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             Expanded(
               child: Swiper(
                 itemBuilder: (BuildContext context, int index) {
+                 
                   return Image(
                     filterQuality: FilterQuality.low,
-                    image: NetworkImageWithRetry(widget.imageUrls[index]),
+                    image: NetworkImageWithRetry(
+                        widget.orderData.imageURLs[index]),
                   );
+                  
+                },
+                onIndexChanged: (int index){
+                   setState(() {
+                    indexImg = index;
+                  });
                 },
                 loop: false,
-                itemCount: widget.imageUrls.length,
+                itemCount: widget.orderData.imageURLs.length,
                 pagination: SwiperPagination(),
                 control: SwiperControl(color: Colors.white),
               ),
@@ -56,7 +67,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             )),
             Expanded(
               child: _selectedTab == 1
-                  ? sizeDetail()
+                  ? sizeDetail(
+                      widget.orderData.range, widget.orderData.frequencyArray[indexImg])
                   : _selectedTab == 2 ? colorDetail() : defectsDetail(),
             )
           ],
@@ -91,9 +103,44 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 
-  Widget sizeDetail() {
-    return Center(
-      child: Text('size'),
+  Widget sizeDetail(List range, List frequencyArr) {
+    
+    List totalFreq = [];
+    var totalVal = frequencyArr.reduce((a,b) => a+b);
+
+    for (var i = 0; i < frequencyArr.length; i++) {
+      totalFreq.add((frequencyArr[i]/totalVal) * 100);
+    }
+
+   
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20.0),
+          border: Border.all(color: Colors.black)
+          //color: Colors.red
+          ),
+      child: DataTable(
+        headingRowHeight: 25.0,
+        dataRowHeight: 30.0,
+        columnSpacing: 10.0,
+        columns: [
+          DataColumn(
+            label: Container(
+              child: Text('Size(mm)'),
+              // color: Colors.red,
+            ),
+          ),
+          DataColumn(label: Text('Percentage'))
+        ],
+        rows: [
+          for (int i = 0; i < range.length - 1; i++)
+            DataRow(cells: [
+              DataCell(Text('${range[i]}-${range[i + 1]}')),
+              DataCell(Text('${num.parse(totalFreq[i].toString()).toStringAsFixed(2)} %'))
+            ]),
+        ],
+      ),
     );
   }
 

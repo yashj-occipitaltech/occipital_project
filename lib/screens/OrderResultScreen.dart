@@ -16,6 +16,8 @@ import 'package:pie_chart/pie_chart.dart';
 import 'dart:math' as math;
 import 'package:occipital_tech/util/colorValues.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+// import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:flutter_circular_chart/flutter_circular_chart.dart';
 
 class OrderResultScreen extends StatefulWidget {
   final String orderId;
@@ -196,7 +198,8 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
                       ? Center(
                           child: Text('No data available'),
                         )
-                      : pieCharts(order.colorDetails[0]),
+                      : showPieChart(
+                          order.colorDetails, order.colorRGB, order.colors),
                   SizedBox(height: 15.0),
                   FlatButton(
                     shape: RoundedRectangleBorder(
@@ -211,8 +214,7 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) =>
-                                  OrderDetailScreen(order.imageURLs)));
+                              builder: (context) => OrderDetailScreen(order)));
                     },
                   )
                   //defectsCard(order.defects[0]['Defective'])
@@ -280,6 +282,7 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
 
   Widget sizeTable(List range, List<List> frequencyArr) {
     List avgList = [];
+    List totalFreq = [];
 
     int index = 0;
     int length = frequencyArr[0].length;
@@ -295,76 +298,136 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
       index++;
     }
 
-    return Container(
-      padding: EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20.0),
-          border: Border.all(color: Colors.black)
-          //color: Colors.red
-          ),
-      child: DataTable(
-        headingRowHeight: 25.0,
-        dataRowHeight: 30.0,
-        columnSpacing: 10.0,
-        columns: [
-          DataColumn(
-            label: Container(
-              child: Text('Size(mm)'),
-              // color: Colors.red,
-            ),
-          ),
-            DataColumn(label: Text('Percentage'))
-        ],
-        rows: [
-          for (int i = 0; i < range.length - 1; i++)
-            DataRow(cells: [DataCell(Text('${range[i]}-${range[i + 1]}')),DataCell(Text('${avgList[i]} %'))]),
+    var valueTwo = avgList.reduce((a, b) => a + b);
 
-          // for (var item in range)
-          //   range.indexOf(item) + 1 <= range.length - 1
-          //       ? DataRow(cells: [
-          //           DataCell(Text('$item-${range[range.indexOf(item) + 1]}'))
-          //         ])
-          //       : DataRow(cells: [DataCell(Text(''))])
-          // DataRow(cells: [DataCell(Text('12')), DataCell(Text('14'))]),
-          // DataRow(cells: [DataCell(Text('16')), DataCell(Text('18'))]),
-        ],
+    for (var k = 0; k < avgList.length; k++) {
+      totalFreq.add((avgList[k] / valueTwo) * 100);
+    }
+
+    return Center(
+      child: Container(
+        decoration: BoxDecoration(
+            border: Border.all(), borderRadius: BorderRadius.circular(10.0)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            DataTable(
+              horizontalMargin: 10.0,
+              headingRowHeight: 25.0,
+              dataRowHeight: 30.0,
+              columnSpacing: 20.0,
+              columns: [
+                DataColumn(
+                  label: Text(
+                    'Size(mm)',
+                  ),
+                ),
+                DataColumn(label: Text('Percentage'))
+              ],
+              rows: [
+                for (int i = 0; i < range.length - 1; i++)
+                  DataRow(cells: [
+                    DataCell(
+                        Center(child: Text('${range[i]}-${range[i + 1]}'))),
+                    DataCell(Center(
+                        child: Text(
+                            '${num.parse(totalFreq[i].toString()).toStringAsFixed(2)} %')))
+                  ]),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget pieCharts(Map<String, double> data) {
+  Widget pieCharts(List<Map<String, double>> data, Map<String, String> colorVal,
+      List<String> colors) {
     Map<String, double> dataMap = Map<String, double>();
-    data.forEach((k, v) {
-      dataMap[k] = v * 100;
-    });
-    return PieChart(
-      dataMap: dataMap,
-      legendFontColor: Colors.blueGrey[900],
-      legendFontSize: 14.0,
-      legendFontWeight: FontWeight.w500,
-      animationDuration: Duration(milliseconds: 800),
-      chartLegendSpacing: 32.0,
-      chartRadius: MediaQuery.of(context).size.width / 1.6,
-      showChartValuesInPercentage: true,
-      showChartValues: true,
-      chartValuesColor: Colors.blueGrey[900].withOpacity(0.9),
-      colorList: [Colors.orange, Colors.red, Colors.yellow, Colors.green],
-      showLegends: false,
-      initialAngle: math.pi * 0.5,
+    // List avgArr = [];
+    // List<Map<String, double>> dataTwo = [];
+    List<PieChartData> pieData = List<PieChartData>();
+    for (var item in colors) {
+      var result =
+          (data.map((m) => m[item]).reduce((a, b) => a + b) / data.length) *
+              100;
+      var myInt = int.parse("0xFF${colorVal[item].substring(1)}");
+      pieData.add(PieChartData(Color(myInt), result, item));
+      // avgArr.add(result);
+      // dataTwo.add({"$item": result});
+    }
+
+    return Container();
+    // data.forEach((k, v) {
+    //   dataMap[k] = v * 100;
+    // });
+    // print(dataMap);
+    // return PieChart(
+    //   dataMap: dataMap,
+    //   legendFontColor: Colors.blueGrey[900],
+    //   legendFontSize: 14.0,
+    //   legendFontWeight: FontWeight.w500,
+    //   animationDuration: Duration(milliseconds: 800),
+    //   chartLegendSpacing: 32.0,
+    //   chartRadius: MediaQuery.of(context).size.width / 1.6,
+    //   showChartValuesInPercentage: true,
+    //   showChartValues: true,
+    //   chartValuesColor: Colors.blueGrey[900].withOpacity(0.9),
+    //   colorList: [Colors.orange, Colors.red, Colors.yellow, Colors.green],
+    //   showLegends: false,
+    //   initialAngle: math.pi * 0.5,
+    // );
+  }
+
+  Widget showPieChart(List<Map<String, double>> data, Map<String, String> colorVal,
+      List<String> colors){
+     List<CircularSegmentEntry> pieData = List<CircularSegmentEntry>();
+    for (var item in colors) {
+      var result =
+          (data.map((m) => m[item]).reduce((a, b) => a + b) / data.length) *
+              100;
+      var myInt = int.parse("0xFF${colorVal[item].substring(1)}");
+      pieData.add(CircularSegmentEntry(result,Color(myInt)));
+      
+    }
+    return AnimatedCircularChart(
+    //key: _chartKey,
+    size: const Size(300.0, 300.0),
+    initialChartData: [CircularStackEntry(pieData)],
+    chartType: CircularChartType.Pie,
+  );
+  }
+  
+  Widget buildPieChart(List<Map<String, double>> data,
+      Map<String, String> colorVal, List<String> colors) {
+    List<PieChartData> pieData = List<PieChartData>();
+    for (var item in colors) {
+      var result =
+          (data.map((m) => m[item]).reduce((a, b) => a + b) / data.length) *
+              100;
+      var myInt = int.parse("0xFF${colorVal[item].substring(1)}");
+      pieData.add(PieChartData(Color(myInt), result, item));
+      // avgArr.add(result);
+      // dataTwo.add({"$item": result});
+    }
+    return Center(
+      child: Container(
+        height: 300.0,
+        width: 300.0,
+        child: SfCircularChart(
+          series: [
+            PieSeries(
+                dataSource: pieData,
+                pointColorMapper: (data, _) => data.color,
+                xValueMapper: (data, _) => data.x,
+                yValueMapper: (data, _) => data.y)
+          ],
+        ),
+      ),
     );
   }
 
-  Widget buildPieChart() {
-    return SfCircularChart(
-      series: [
-        PieSeries(
-            // dataSource:
-            )
-      ],
-    );
-  }
-
-  getColors() {}
 
   Widget defectsCard(double defect) {
     final _defectVal = num.parse((defect * 100).toStringAsFixed(0));
@@ -414,9 +477,11 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
 }
 
 class PieChartData {
-  final String value;
-  final double percentage;
+  final String x;
+  final double y;
   final Color color;
 
-  PieChartData(this.color, this.percentage, this.value);
+  PieChartData(this.color, this.y, this.x);
 }
+
+

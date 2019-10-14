@@ -87,21 +87,24 @@ class _PreviousDataState extends State<PreviousData> {
           child: _dropDowns(),
         ),
         Expanded(
-          child: StreamBuilder(
-              stream: orders,
-              builder: (context, snapshot) {
-                final data = snapshot.data as OrdersData;
+          child: RefreshIndicator(
+                      onRefresh: () => _getOrders(),
+                      child: StreamBuilder(
+                stream: orders,
+                builder: (context, snapshot) {
+                  final data = snapshot.data as OrdersData;
 
-                return snapshot.hasData
-                    ? data.cities == null
-                        ? Center(
-                            child: Text('No orders found '),
-                          )
-                        : makeTiles(data)
-                    : Center(
-                        child: CircularProgressIndicator(),
-                      );
-              }),
+                  return snapshot.hasData
+                      ? data.cities == null
+                          ? Center(
+                              child: Text('No orders found '),
+                            )
+                          : makeTiles(data)
+                      : Center(
+                          child: CircularProgressIndicator(),
+                        );
+                }),
+          ),
         )
       ],
     ));
