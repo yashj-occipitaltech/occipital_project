@@ -150,7 +150,7 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
                   SizedBox(
                     width: 10.0,
                   ),
-                  Text('Donwloading file: $progressString'),
+                  Text('Downloading file: $progressString'),
                 ],
               ),
             )
@@ -190,7 +190,7 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
                   SizedBox(height: 15.0),
                   Text('Average Details of All Images'),
                   SizedBox(height: 15.0),
-                  sizeTable(),
+                  sizeTable(order.range, order.frequencyArray),
                   SizedBox(height: 15.0),
                   order.colorDetails == null
                       ? Center(
@@ -278,7 +278,23 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
     );
   }
 
-  Widget sizeTable() {
+  Widget sizeTable(List range, List<List> frequencyArr) {
+    List avgList = [];
+
+    int index = 0;
+    int length = frequencyArr[0].length;
+    var tempArr = [];
+
+    while (index < length) {
+      for (var i = 0; i < frequencyArr.length; i++) {
+        tempArr.add(frequencyArr[i][index]);
+      }
+      var value = tempArr.reduce((a, b) => a + b) / frequencyArr.length;
+      avgList.add(value);
+      tempArr.clear();
+      index++;
+    }
+
     return Container(
       padding: EdgeInsets.all(8.0),
       decoration: BoxDecoration(
@@ -294,14 +310,23 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
           DataColumn(
             label: Container(
               child: Text('Size(mm)'),
-              color: Colors.red,
+              // color: Colors.red,
             ),
           ),
-          DataColumn(label: Text('Percentage'))
+            DataColumn(label: Text('Percentage'))
         ],
         rows: [
-          DataRow(cells: [DataCell(Text('12')), DataCell(Text('14'))]),
-          DataRow(cells: [DataCell(Text('16')), DataCell(Text('18'))]),
+          for (int i = 0; i < range.length - 1; i++)
+            DataRow(cells: [DataCell(Text('${range[i]}-${range[i + 1]}')),DataCell(Text('${avgList[i]} %'))]),
+
+          // for (var item in range)
+          //   range.indexOf(item) + 1 <= range.length - 1
+          //       ? DataRow(cells: [
+          //           DataCell(Text('$item-${range[range.indexOf(item) + 1]}'))
+          //         ])
+          //       : DataRow(cells: [DataCell(Text(''))])
+          // DataRow(cells: [DataCell(Text('12')), DataCell(Text('14'))]),
+          // DataRow(cells: [DataCell(Text('16')), DataCell(Text('18'))]),
         ],
       ),
     );
@@ -374,7 +399,15 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
     return Table(
       border: TableBorder.all(),
       children: [
-        // TableRow(children: )
+        TableRow(
+          children: [Text('Size'), Text('Percentage')],
+        ),
+        TableRow(
+          children: [Text('Size'), Text('113')],
+        ),
+        TableRow(
+          children: [Text('12'), Text('113')],
+        ),
       ],
     );
   }

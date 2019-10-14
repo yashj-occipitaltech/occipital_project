@@ -7,6 +7,7 @@ import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:occipital_tech/models/order_status_result.dart';
 import 'package:occipital_tech/models/upload_images_response.dart';
 import 'package:occipital_tech/models/upload_order.dart';
 import 'package:occipital_tech/screens/HomePage.dart';
@@ -23,7 +24,8 @@ class CommodityForm extends StatefulWidget {
 }
 
 class _CommodityFormState extends State<CommodityForm> {
-  String _value = 'Onion';
+  String _value;
+  List<String> _commodities = List<String>();
 
   String _description = '';
 
@@ -35,9 +37,11 @@ class _CommodityFormState extends State<CommodityForm> {
 
   final _formKeyCommodity = GlobalKey<FormState>();
   final now = DateTime.now();
+  // final progressListener = StreamController();
 
   void initState() {
     super.initState();
+    getCommodities();
     // images.add(Image.asset(name))
   }
 
@@ -45,6 +49,8 @@ class _CommodityFormState extends State<CommodityForm> {
     super.dispose();
     images.close();
     progressValue.close();
+    // progressListener.close();
+    // progressListener.();
   }
 
   Future<String> get _localPath async {
@@ -97,7 +103,9 @@ class _CommodityFormState extends State<CommodityForm> {
             padding: EdgeInsets.all(10.0),
             child: InkWell(
               onTap: () async {
-                if (_images.length <= 0) {
+                if (_value == null) {
+                  Fluttertoast.showToast(msg: 'Please select a commodity');
+                } else if (_images.length <= 0) {
                   Fluttertoast.showToast(msg: 'Please upload an image');
                 } else {
                   final SharedPreferences prefs =
@@ -153,8 +161,8 @@ class _CommodityFormState extends State<CommodityForm> {
 
   DropdownButton _itemDown() => DropdownButton<String>(
         items: [
-          DropdownMenuItem(value: "Onion", child: Text('Onion')),
-          DropdownMenuItem(value: "Tomato", child: Text('Tomato')),
+          for (var item in _commodities)
+            DropdownMenuItem(value: "$item", child: Text('$item'))
         ],
         onChanged: (value) {
           setState(() {
@@ -187,10 +195,10 @@ class _CommodityFormState extends State<CommodityForm> {
 
   Widget imageUploadButton() {
     return FlatButton(
-      onPressed: () {
-        if (_images.length >= Values.uploadsAllowed) {
+      onPressed: () async {
+        if (_images.length >= await imagesAllowed()) {
           Fluttertoast.showToast(
-              msg: 'Only ${Values.uploadsAllowed} images are allowed');
+              msg: 'Only ${await imagesAllowed()} images are allowed');
         } else {
           addImagesToList();
         }
@@ -274,30 +282,36 @@ class _CommodityFormState extends State<CommodityForm> {
         barrierDismissible: false,
         builder: (BuildContext context) {
           return WillPopScope(
-                      onWillPop: ()async => false,
-                      child: AlertDialog(
+            onWillPop: () async => false,
+            child: AlertDialog(
               elevation: 0.0,
-             // backgroundColor: Colors.transparent,
               contentPadding: EdgeInsets.all(16.0),
               content: Column(
-                mainAxisSize:MainAxisSize.min ,
+                mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Row(
-                      children: <Widget>[
-                        Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                        SizedBox(
-                          width: 10.0,
-                        ),
-                        Text('Uploading '),
-                        StreamBuilder<Object>(
-                            stream: progressValue,
-                            builder: (context, snapshot) {
-                              return Text('${snapshot.data.toString()}%');
-                            })
-                      ],
-                    ),
+                    children: <Widget>[
+                      Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      SizedBox(
+                        width: 10.0,
+                      ),
+                      Text('Uploading '),
+                      StreamBuilder<Object>(
+                          stream: progressValue,
+                          builder: (context, snapshot) {
+                            return Text('${snapshot.data.toString()}%');
+                          })
+                    ],
+                  ),
+                  // StreamBuilder<Object>(
+                  //   stream: progressValue,
+                  //   builder: (context, snapshot) {
+                  //     print(double.parse(snapshot.data));
+                  //     return LinearProgressIndicator(value:double.parse(snapshot.data) ,);
+                  //   }
+                  // )
                 ],
               ),
             ),
@@ -331,17 +345,41 @@ class _CommodityFormState extends State<CommodityForm> {
       progressValue.add(progress.progress.toString());
     });
     final subscription = uploader.result.listen((result) {
-      if (result.statusCode == 200 && result.status.value == 3) {
-        Fluttertoast.showToast(msg: 'Successfully Uploaded');
-        Navigator.pushReplacementNamed(context, '/home');
-      }
       //... code to handle result
+      if (result.statusCode == 200 && result.status.value == 3) {
+        final responseData = json.decode(result.response);
+
+        Fluttertoast.showToast(msg: 'Successfully Uploaded');
+        Navigator.pushReplacementNamed(context, '/home',
+            arguments: ScreenArgs(responseData['OrderId']));
+      }
     }, onError: (ex, stacktrace) {
+      // ... code to handle error
       print('From errpr');
       print(ex);
-     Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/home');
       Fluttertoast.showToast(msg: 'Some error occured.Please try again');
-      // ... code to handle error
     });
   }
+
+  getCommodities() async {
+    final prefs = await SharedPreferences.getInstance();
+    final commodities = prefs.getStringList('commodities');
+    print(commodities);
+    setState(() {
+      _commodities = commodities;
+    });
+  }
+
+  Future<int> imagesAllowed() async {
+    final prefs = await SharedPreferences.getInstance();
+    final maxImages = prefs.getInt('maxImages');
+    return maxImages;
+  }
+}
+
+class ScreenArgs {
+  String orderId;
+
+  ScreenArgs(this.orderId);
 }

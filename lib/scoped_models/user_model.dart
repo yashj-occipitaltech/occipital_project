@@ -43,6 +43,7 @@ class UserModel extends Model {
         userType: response.userType,
         commodities: response.commodities,
         maxImages: response.maxImages,
+        
       );
       _savePrefs(_authenticatedUser);
       _userSubject.add(true);
@@ -142,6 +143,9 @@ class UserModel extends Model {
     //prefs.setString('phoneNo', user.phoneNo);
     prefs.setString('token', user.accessToken);
     prefs.setString('userName', user.userName);
+    prefs.setInt('maxImages', user.maxImages);
+    prefs.setStringList('commodities', user.commodities);
+
   }
 
   void storePhoneNo(String phoneNo) async {

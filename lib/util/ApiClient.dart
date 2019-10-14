@@ -121,7 +121,7 @@ class ApiClient {
         ApiEndpoints.baseUrl + ApiEndpoints.getOrderData,
         body: json.encode(order));
 
-  //  print(response.body.toString());
+    print(response.body.toString());
 
     return GetOrderData.fromJson(json.decode(response.body));
   }
