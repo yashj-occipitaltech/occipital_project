@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_circular_chart/flutter_circular_chart.dart';
 import 'package:flutter_image/network.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:occipital_tech/models/get_order_data.dart';
 import 'package:occipital_tech/util/widgets.dart';
-import 'package:occipital_tech/util/colorValues.dart';
 
 class OrderDetailScreen extends StatefulWidget {
   final GetOrderData orderData;
@@ -16,11 +16,20 @@ class OrderDetailScreen extends StatefulWidget {
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   int _selectedTab = 1;
   int indexImg = 0;
+  
 
   changeSelectedTab(int tab) {
     setState(() {
       _selectedTab = tab;
     });
+  }
+
+  void initState() {
+    super.initState();
+  }
+
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -37,16 +46,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             Expanded(
               child: Swiper(
                 itemBuilder: (BuildContext context, int index) {
-                 
                   return Image(
                     filterQuality: FilterQuality.low,
                     image: NetworkImageWithRetry(
                         widget.orderData.imageURLs[index]),
                   );
-                  
                 },
-                onIndexChanged: (int index){
-                   setState(() {
+                onIndexChanged: (int index) {
+                  setState(() {
                     indexImg = index;
                   });
                 },
@@ -56,20 +63,22 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 control: SwiperControl(color: Colors.white),
               ),
             ),
-            Expanded(
-                child: Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 tabButton('Size', 1),
                 tabButton('Color', 2),
                 tabButton('Defects', 3),
               ],
-            )),
-            Expanded(
+            ),
+            SingleChildScrollView(
               child: _selectedTab == 1
-                  ? sizeDetail(
-                      widget.orderData.range, widget.orderData.frequencyArray[indexImg])
-                  : _selectedTab == 2 ? colorDetail() : defectsDetail(),
+                  ? sizeDetail(widget.orderData.range,
+                      widget.orderData.frequencyArray[indexImg])
+                  : _selectedTab == 2
+                      ? colorDetail(widget.orderData.colorDetails[indexImg],
+                          widget.orderData.colorRGB, widget.orderData.colors)
+                      : defectsDetail(),
             )
           ],
         ),
@@ -104,22 +113,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   Widget sizeDetail(List range, List frequencyArr) {
-    
     List totalFreq = [];
-    var totalVal = frequencyArr.reduce((a,b) => a+b);
+    var totalVal = frequencyArr.reduce((a, b) => a + b);
 
     for (var i = 0; i < frequencyArr.length; i++) {
-      totalFreq.add((frequencyArr[i]/totalVal) * 100);
+      totalFreq.add((frequencyArr[i] / totalVal) * 100);
     }
 
-   
-    return Container(
-      padding: EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20.0),
-          border: Border.all(color: Colors.black)
-          //color: Colors.red
-          ),
+    // updatePiechartData();
+
+    return SingleChildScrollView(
       child: DataTable(
         headingRowHeight: 25.0,
         dataRowHeight: 30.0,
@@ -137,16 +140,29 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           for (int i = 0; i < range.length - 1; i++)
             DataRow(cells: [
               DataCell(Text('${range[i]}-${range[i + 1]}')),
-              DataCell(Text('${num.parse(totalFreq[i].toString()).toStringAsFixed(2)} %'))
+              DataCell(Text(
+                  '${num.parse(totalFreq[i].toString()).toStringAsFixed(2)} %'))
             ]),
         ],
       ),
     );
   }
 
-  Widget colorDetail() {
-    return Center(
-      child: Text('color'),
+  Widget colorDetail(Map<String, double> colorDetail,
+      Map<String, String> colorVal, List<String> colors) {
+    List<CircularSegmentEntry> pieData = List<CircularSegmentEntry>();
+    for (var item in colors) {
+      var result = colorDetail[item] * 100;
+      var myInt = int.parse("0xFF${colorVal[item].substring(1)}");
+      pieData.add(CircularSegmentEntry(result, Color(myInt)));
+    }
+
+    return AnimatedCircularChart(
+     // key: _chartKey,
+      size: Size(300.0, 300.0),
+      initialChartData: [CircularStackEntry(pieData)],
+      chartType: CircularChartType.Pie,
+      percentageValues: true,
     );
   }
 
