@@ -179,18 +179,10 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15.0)),
                           padding: EdgeInsets.all(16.0),
-                          child: Column(
-                            children: <Widget>[
-                              Text(
-                                'OK',
-                                style: TextStyle(
-                                    fontSize: 16.0, color: Colors.white),
-                              ),
-                              SizedBox(
-                                height: 10.0,
-                              ),
-                              checkingUser ? Text('Checking user') : Container()
-                            ],
+                          child: Text(
+                            'OK',
+                            style: TextStyle(
+                                fontSize: 16.0, color: Colors.white),
                           ),
                           onPressed: () async {
                              setState(() {
