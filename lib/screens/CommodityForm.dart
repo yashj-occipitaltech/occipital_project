@@ -3,10 +3,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geocoder/geocoder.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:location_permissions/location_permissions.dart';
 import 'package:occipital_tech/models/order_status_result.dart';
 import 'package:occipital_tech/models/upload_images_response.dart';
 import 'package:occipital_tech/models/upload_order.dart';
@@ -17,6 +21,7 @@ import 'package:occipital_tech/util/widgets.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:geolocator/geolocator.dart';
 
 class CommodityForm extends StatefulWidget {
   @override
@@ -37,48 +42,63 @@ class _CommodityFormState extends State<CommodityForm> {
 
   final _formKeyCommodity = GlobalKey<FormState>();
   final now = DateTime.now();
-  // final progressListener = StreamController();
 
   void initState() {
     super.initState();
     getCommodities();
-    // images.add(Image.asset(name))
   }
 
   void dispose() {
     super.dispose();
     images.close();
     progressValue.close();
-    // progressListener.close();
-    // progressListener.();
   }
 
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-
-    return directory.path;
+  Future<bool> getCompressionSetting()async{
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('compression');
   }
 
-  Future<File> get _localFile async {
-    final path = await _localPath;
+  // Future<String> get _localPath async {
+  //   final directory = await getApplicationDocumentsDirectory();
 
-    _images.forEach((f) {
-      f.path;
-    });
-    return File('$path/uploads');
-  }
+  //   return directory.path;
+  // }
+
+  // Future<File> get _localFile async {
+  //   final path = await _localPath;
+
+  //   _images.forEach((f) {
+  //     f.path;
+  //   });
+  //   return File('$path/uploads');
+  // }
 
   Future<void> addImagesToList() async {
     File selected = await ImagePicker.pickImage(source: ImageSource.camera);
 
     if (selected != null) {
-      String fileName = selected.path.split('/').last;
-      print(fileName);
-      print(selected.path);
-      _images.add(selected);
-      print(_images);
+      File croppedImage = await _cropImage(selected);
+      _images.add(croppedImage ?? selected);
+      final compressionVal = await getCompressionSetting() ;
+      if(compressionVal==true){
+         var result = await FlutterImageCompress.compressAndGetFile(
+          (croppedImage ?? selected).path, (croppedImage ?? selected).path,
+          quality: 60, minWidth: 2000, minHeight: 2000);
+      }
+      // print(result.lengthSync());
       images.add(_images);
     }
+  }
+
+  Future<File> _cropImage(File selected) async {
+    File cropped = await ImageCropper.cropImage(
+        sourcePath: selected.path,
+        toolbarColor: Colors.green,
+        toolbarWidgetColor: Colors.white,
+        toolbarTitle: 'Crop It',
+        statusBarColor: Colors.green);
+    return cropped;
   }
 
   void deleteImage(int index) {
@@ -102,29 +122,7 @@ class _CommodityFormState extends State<CommodityForm> {
           Padding(
             padding: EdgeInsets.all(10.0),
             child: InkWell(
-              onTap: () async {
-                if (_value == null) {
-                  Fluttertoast.showToast(msg: 'Please select a commodity');
-                } else if (_images.length <= 0) {
-                  Fluttertoast.showToast(msg: 'Please upload an image');
-                } else {
-                  final SharedPreferences prefs =
-                      await SharedPreferences.getInstance();
-                  final response = await uploadImages(
-                      UploadOrder(
-                          prefs.getString('phoneNo'),
-                          DateFormat("H:m:s").format(now),
-                          now.day.toString(),
-                          now.month.toString(),
-                          now.year.toString(),
-                          "Mumbai",
-                          _value,
-                          prefs.getString('userType'),
-                          prefs.getString('token'),
-                          _description),
-                      _images);
-                }
-              },
+              onTap: () async => _onFormSubmmited(),
               child: Icon(Icons.check),
             ),
           )
@@ -157,6 +155,53 @@ class _CommodityFormState extends State<CommodityForm> {
         ),
       ),
     );
+  }
+
+  _onFormSubmmited() async {
+    if (_value == null) {
+      Fluttertoast.showToast(msg: 'Please select a commodity');
+    } else if (_images.length <= 0) {
+      Fluttertoast.showToast(msg: 'Please upload an image');
+    } else {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      final permission = await Geolocator().checkGeolocationPermissionStatus();
+      ServiceStatus serviceStatus = await LocationPermissions().checkServiceStatus();
+      print(serviceStatus);
+      print(permission);
+      if (permission == GeolocationStatus.denied ||
+          permission == GeolocationStatus.disabled) {
+        print('I am hrer');
+      await LocationPermissions().requestPermissions();
+      }else if(serviceStatus==ServiceStatus.disabled){
+        Fluttertoast.showToast(msg: 'Please enable location');
+        await LocationPermissions().requestPermissions();
+      } 
+      
+      else if(permission==GeolocationStatus.granted&&serviceStatus==ServiceStatus.enabled) {
+        Position position = await Geolocator()
+            .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+        final coordinates =
+            new Coordinates(position.latitude, position.longitude);
+        final addresses =
+            await Geocoder.local.findAddressesFromCoordinates(coordinates);
+        await uploadImages(
+            UploadOrder(
+                prefs.getString('phoneNo'),
+                DateFormat("H:m:s").format(now),
+                now.day.toString(),
+                now.month.toString(),
+                now.year.toString(),
+                "${addresses.first.featureName}",
+                _value,
+                prefs.getString('userType'),
+                prefs.getString('token'),
+                _description,
+                addresses.first.addressLine
+                ),
+            _images);
+      }
+    }
   }
 
   DropdownButton _itemDown() => DropdownButton<String>(
@@ -321,22 +366,19 @@ class _CommodityFormState extends State<CommodityForm> {
 
   Future uploadImages(UploadOrder order, List<File> images) async {
     final uploader = FlutterUploader();
-    String fileName = images[0].path.split('/').last;
     final Directory dir = await getApplicationDocumentsDirectory();
-    final url = 'http://34.93.237.2${ApiEndpoints.uploadImages}';
-    print(url);
-    final String savedDir =
-        '/storage/emulated/0/Android/data/com.occipitaltech.agrograde/files/Pictures/';
-    print('---->');
-
-    print(fileName);
-    print(savedDir);
-    print('---->');
+    print(dir.path.split('/').take(5).join('/').substring(1));
+    final String savedDir = 'data/user/0/com.occipitaltech.agrograde/cache';
     final task = await uploader.enqueue(
-      url: url,
+      url: '${ApiEndpoints.baseUrl}${ApiEndpoints.uploadImages}',
       method: UploadMethod.POST,
       files: [
-        FileItem(filename: fileName, fieldname: 'uploads', savedDir: savedDir),
+        // FileItem(filename: fileName, fieldname: 'uploads', savedDir: savedDir),
+        for (var image in images)
+          FileItem(
+              filename: image.path.split('/').last,
+              fieldname: 'uploads',
+              savedDir: '${dir.path.split('/').take(5).join('/').substring(1)}/cache')
       ],
       data: order.toJson().cast<String, String>(),
     );
@@ -365,7 +407,6 @@ class _CommodityFormState extends State<CommodityForm> {
   getCommodities() async {
     final prefs = await SharedPreferences.getInstance();
     final commodities = prefs.getStringList('commodities');
-    print(commodities);
     setState(() {
       _commodities = commodities;
     });

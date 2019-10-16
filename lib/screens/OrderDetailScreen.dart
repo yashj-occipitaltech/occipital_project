@@ -16,6 +16,9 @@ class OrderDetailScreen extends StatefulWidget {
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   int _selectedTab = 1;
   int indexImg = 0;
+
+  final GlobalKey<AnimatedCircularChartState> _chartKey = new GlobalKey<AnimatedCircularChartState>();
+  
   
 
   changeSelectedTab(int tab) {
@@ -56,6 +59,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   setState(() {
                     indexImg = index;
                   });
+                  _changePieData(widget.orderData.colorDetails[index],
+                          widget.orderData.colorRGB, widget.orderData.colors);
                 },
                 loop: false,
                 itemCount: widget.orderData.imageURLs.length,
@@ -78,7 +83,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   : _selectedTab == 2
                       ? colorDetail(widget.orderData.colorDetails[indexImg],
                           widget.orderData.colorRGB, widget.orderData.colors)
-                      : defectsDetail(),
+                      : Padding(padding: EdgeInsets.symmetric(vertical: 120.0,horizontal: 16.0),child: defectsDetail(widget.orderData.defects[indexImg],widget.orderData.totalDefects),),
             )
           ],
         ),
@@ -122,28 +127,36 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
     // updatePiechartData();
 
-    return SingleChildScrollView(
-      child: DataTable(
-        headingRowHeight: 25.0,
-        dataRowHeight: 30.0,
-        columnSpacing: 10.0,
-        columns: [
-          DataColumn(
-            label: Container(
-              child: Text('Size(mm)'),
-              // color: Colors.red,
-            ),
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: SingleChildScrollView(
+        child: 
+          Container(
+          decoration: BoxDecoration(
+              border: Border.all(), borderRadius: BorderRadius.circular(10.0)),
+          child: DataTable(
+            headingRowHeight: 25.0,
+            dataRowHeight: 30.0,
+            columnSpacing: 10.0,
+            columns: [
+              DataColumn(
+                label: Container(
+                  child: Text('Size(mm)'),
+                  // color: Colors.red,
+                ),
+              ),
+              DataColumn(label: Text('Percentage'))
+            ],
+            rows: [
+              for (int i = 0; i < range.length - 1; i++)
+                DataRow(cells: [
+                  DataCell(Text('${range[i]}-${range[i + 1]}')),
+                  DataCell(Text(
+                      '${num.parse(totalFreq[i].toString()).toStringAsFixed(2)} %'))
+                ]),
+            ],
           ),
-          DataColumn(label: Text('Percentage'))
-        ],
-        rows: [
-          for (int i = 0; i < range.length - 1; i++)
-            DataRow(cells: [
-              DataCell(Text('${range[i]}-${range[i + 1]}')),
-              DataCell(Text(
-                  '${num.parse(totalFreq[i].toString()).toStringAsFixed(2)} %'))
-            ]),
-        ],
+        ),
       ),
     );
   }
@@ -158,7 +171,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     }
 
     return AnimatedCircularChart(
-     // key: _chartKey,
+     key: _chartKey,
       size: Size(300.0, 300.0),
       initialChartData: [CircularStackEntry(pieData)],
       chartType: CircularChartType.Pie,
@@ -166,9 +179,51 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 
-  Widget defectsDetail() {
-    return Center(
-      child: Text('defects'),
+
+  void _changePieData(Map<String, double> colorDetail,
+      Map<String, String> colorVal, List<String> colors){
+        List<CircularSegmentEntry> pieData = List<CircularSegmentEntry>();
+    for (var item in colors) {
+      var result = colorDetail[item] * 100;
+      var myInt = int.parse("0xFF${colorVal[item].substring(1)}");
+      pieData.add(CircularSegmentEntry(result, Color(myInt)));
+    }
+    setState(() {
+      print([CircularStackEntry(pieData)].first.entries);
+    _chartKey.currentState.updateData([CircularStackEntry(pieData)]);
+  });
+  }
+
+  Widget defectsDetail(Map<String,String> data,List<String> totalDefects) {
+    // num _defectVal =0;
+    // for(var item in totalDefects){
+    //   _defectVal += num.parse(data[item])*100;
+    // }
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Text('Defects', style: TextStyle(fontSize: 16.0)),
+            Container(
+              
+              padding: EdgeInsets.all(10.0),
+              width: 90.0,
+              decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(30.0)),
+              child: Center(
+                  child: Text(
+                '${data['Defective'].toString()}',
+                style: TextStyle(color: Colors.white),
+                textAlign: TextAlign.center,
+              )),
+            )
+          ],
+        ),
+      ),
     );
   }
 }

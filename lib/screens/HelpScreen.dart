@@ -11,6 +11,9 @@ class HelpScreen extends StatelessWidget {
     return Scaffold(
        drawer: AppDrawer(),
       appBar: Widgets.appBar('Help'),
+      body: Center(
+        child: Text('Help Here'),
+      ),
     );
   }
 }

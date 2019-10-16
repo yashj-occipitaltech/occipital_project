@@ -1,8 +1,16 @@
-import 'package:flutter/material.dart';
-import 'package:occipital_tech/screens/OrderResultScreen.dart';
-import 'package:occipital_tech/util/colorValues.dart';
+import 'dart:async';
 
-class OrderDataTiles extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:occipital_tech/models/order_status_check.dart';
+import 'package:occipital_tech/models/order_status_result.dart';
+import 'package:occipital_tech/screens/OrderResultScreen.dart';
+import 'package:occipital_tech/util/ApiClient.dart';
+import 'package:occipital_tech/util/colorValues.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class OrderDataTiles extends StatefulWidget {
   final String number;
   final String location;
   final String status;
@@ -12,71 +20,200 @@ class OrderDataTiles extends StatelessWidget {
   final String orderId;
   final String time;
   final String year;
+  final int index;
+  final String recentOrderId;
   OrderDataTiles(this.number, this.location, this.status, this.date, this.month,
-      this.commodity, this.orderId, this.time, this.year);
+      this.commodity, this.orderId, this.time, this.year,
+      {this.index, this.recentOrderId});
+
+  @override
+  _OrderDataTilesState createState() => _OrderDataTilesState();
+}
+
+class _OrderDataTilesState extends State<OrderDataTiles> {
+  final recentOrderStatus = BehaviorSubject();
+  Timer timer;
+
+  void dispose() {
+    super.dispose();
+    recentOrderStatus.close();
+    timer?.cancel();
+  }
+
+  checkStatus(String orderId) async {
+    print('Running ');
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final OrderStatusResult data = await ApiClient.checkStatus(
+        OrderStatusCheck(orderId, prefs.getString('token')));
+    recentOrderStatus.add(
+        statusString(data.pdfStatus, data.commodityStatus, data.markerStatus));
+    print(recentOrderStatus.value);
+  }
+
+  void initState() {
+    super.initState();
+    if (widget.index == 0 && widget.recentOrderId != null) {
+      timer = Timer.periodic(Duration(seconds: 20), (timer) {
+        if (recentOrderStatus.value == 'Completed') {
+          cancelTimer();
+        } else {
+          checkStatus(widget.orderId);
+        }
+      });
+    }
+  }
+
+  cancelTimer() {
+    timer.cancel();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        print(orderId);
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => OrderResultScreen(orderId)));
-      },
-      child: Card(
-        elevation: 0.8,
-        margin: EdgeInsets.all(10.0),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0))),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Text(
-                        'Order No:',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 18.0),
-                      ),
-                      Text(
-                        ' $number',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18.0,
-                            color: Color(0XFF01AF51)),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 8.0,
-                  ),
-                  Text("$commodity",
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  SizedBox(
-                    height: 8.0,
-                  ),
-                  locationTile(location, date, month, time, year)
-                ],
-              ),
+    return StreamBuilder<Object>(
+      stream: recentOrderStatus,
+      builder: (context, snapshot) {
+        return InkWell(
+            onTap: () {
+                widget.status == 'Completed'
+                    ? Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                OrderResultScreen(widget.orderId)))
+                    : Fluttertoast.showToast(msg: 'Still Processing');
+            },
+            child: cardUi());
+      }
+    );
+  }
+
+  Widget cardUi() {
+    return Card(
+      elevation: 0.8,
+      margin: EdgeInsets.all(10.0),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0))),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Text(
+                      'Order No:',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 18.0),
+                    ),
+                    Text(
+                      ' ${widget.number}',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18.0,
+                          color: Color(0XFF01AF51)),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 8.0,
+                ),
+                Text("${widget.commodity}",
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                SizedBox(
+                  height: 8.0,
+                ),
+                locationTile(widget.location, widget.date, widget.month,
+                    widget.time, widget.year),
+                SizedBox(
+                  height: 4.0,
+                ),
+                Text(
+                    '${widget.date}-${widget.month}-${widget.year.substring(2)}, ${widget.time.substring(0, 5)}'),
+              ],
             ),
-            statusChip(status)
-          ],
-        ),
+          ),
+          widget.index == 0 && widget.recentOrderId != null
+              ? streamStatus()
+              : statusChip(widget.status)
+        ],
       ),
     );
   }
 
+  Widget streamStatus() {
+    return StreamBuilder<Object>(
+        stream: recentOrderStatus,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Container(
+              width: 120.0,
+              padding: EdgeInsets.all(10.0),
+              child: Text(
+                snapshot.data.toString(),
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white),
+              ),
+              decoration: BoxDecoration(
+                  color: getColorForStatus(snapshot.data.toString()),
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(50.0),
+                      bottomLeft: Radius.circular(50.0))),
+            );
+          } else {
+            return Container(
+              width: 120.0,
+              padding: EdgeInsets.all(10.0),
+              child: Text(
+                'Loading',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white),
+              ),
+              decoration: BoxDecoration(
+                  color: getColorForStatus('Loading'),
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(50.0),
+                      bottomLeft: Radius.circular(50.0))),
+            );
+          }
+        });
+  }
+
+  String statusString(
+      String pdfStatus, String commodityStatus, String markerStatus) {
+    String status = "";
+    if (pdfStatus == 'False' &&
+        commodityStatus == 'False' &&
+        markerStatus == 'False') {
+      status = 'Processing 0%';
+    } else if (commodityStatus == 'True' &&
+        pdfStatus == 'False' &&
+        markerStatus == 'False') {
+      status = "Processing 50%";
+    } else if (commodityStatus == 'True' &&
+        pdfStatus == 'True' &&
+        markerStatus == 'False') {
+      status = "Processing 80%";
+    } else if (markerStatus == 'Error') {
+      status = "Error";
+    } else if (commodityStatus == 'True' &&
+        pdfStatus == 'True' &&
+        markerStatus == 'True') {
+      status = "Completed";
+    } else {
+      status = "Completed";
+    }
+
+    return status;
+  }
+
   Widget statusChip(String status) {
     return Container(
-      width: 100.0,
+      width: 120.0,
       padding: EdgeInsets.all(10.0),
       child: Text(
         status,
@@ -102,8 +239,12 @@ class OrderDataTiles extends StatelessWidget {
           size: 15.0,
           color: Colors.red,
         ),
-        Text('$location, '),
-        Text('$date-$month-${year.substring(2)}, $time'),
+        Text(
+          '$location',
+          overflow: TextOverflow.clip,
+          softWrap: true,
+        ),
+        // Text('$date-$month-${year.substring(2)}, $time'),
       ],
     );
   }
@@ -126,7 +267,8 @@ class OrderDataTiles extends StatelessWidget {
         break;
       case 'Processing 80%':
         return Colors.orange[600];
-
+      case 'Loading':
+        return Colors.blue;
         break;
     }
   }

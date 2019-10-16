@@ -21,6 +21,10 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
   String verificationId;
   String errorMessage = '';
   bool hasError = false;
+  bool isLoading = false;
+  bool isLoadingDialog = false;
+  bool checkingUser = false;
+
   FirebaseAuth _auth = FirebaseAuth.instance;
   final _formKeyOTP = GlobalKey<FormState>();
 
@@ -32,6 +36,9 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
     final PhoneCodeSent smsOTPSent = (String verId, [int forceCodeResend]) {
       this.verificationId = verId;
       smsOTPDialog(context).then((value) {
+        setState(() {
+          isLoading = false;
+        });
         print('sign in');
       });
     };
@@ -165,36 +172,46 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
                 height: 10.0,
               ),
               Center(
-                child: StreamBuilder<Object>(
-                    stream: model.loadingState,
-                    builder: (context, snapshot) {
-                      return FlatButton(
-                        color: Color(0XFF01AF51),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.0)),
-                        padding: EdgeInsets.all(16.0),
-                        child: model.state == ViewState.Busy
-                            ? CircularProgressIndicator()
-                            : Text(
+                  child: isLoadingDialog
+                      ? CircularProgressIndicator()
+                      : FlatButton(
+                          color: Color(0XFF01AF51),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0)),
+                          padding: EdgeInsets.all(16.0),
+                          child: Column(
+                            children: <Widget>[
+                              Text(
                                 'OK',
                                 style: TextStyle(
                                     fontSize: 16.0, color: Colors.white),
                               ),
-                        onPressed: () async {
-                          final user = await _auth.currentUser();
-                          if (smsOTP.isEmpty || smsOTP.length < 6) {
-                            Fluttertoast.showToast(msg: 'Please enter the OTP');
-                            setState(() {
-                              hasError = true;
-                            });
-                          } else {
-                            _onButtonPressed(user);
-                            print(model.loadingState.value.toString());
-                          }
-                        },
-                      );
-                    }),
-              ),
+                              SizedBox(
+                                height: 10.0,
+                              ),
+                              checkingUser ? Text('Checking user') : Container()
+                            ],
+                          ),
+                          onPressed: () async {
+                             setState(() {
+                                isLoadingDialog = true;
+                              });
+                            final user = await _auth.currentUser();
+                           
+                            if (smsOTP.isEmpty || smsOTP.length < 6) {
+                              Fluttertoast.showToast(
+                                  msg: 'Please enter the OTP');
+                              setState(() {
+                                hasError = true;
+                                isLoadingDialog = false;
+                              });
+                            } else {
+                              
+                              _onButtonPressed(user);
+                              //print(model.loadingState.value.toString());
+                            }
+                          },
+                        )),
               SizedBox(
                 height: 10.0,
               )
@@ -226,12 +243,15 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
       builder: (context, _, UserModel model) {
         return Align(
           alignment: Alignment.bottomCenter,
-          child: model.isLoading
+          child: isLoading
               ? CircularProgressIndicator()
               : RawMaterialButton(
                   onPressed: () {
                     if (_formKeyOTP.currentState.validate()) {
                       _formKeyOTP.currentState.save();
+                      setState(() {
+                        isLoading = true;
+                      });
                       verifyPhone();
                     }
                   },
@@ -308,6 +328,10 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
   }
 
   _onButtonPressed(FirebaseUser user) async {
+    setState(() {
+      isLoadingDialog = true;
+      checkingUser = true;
+    });
     final userVerified = await signIn();
 
     if (userVerified == true) {
@@ -320,13 +344,22 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
           Navigator.pushNamed(context, '/signup');
         } else if (response['success'] == 'Error' ||
             response['resultCode'] == 2) {
+          setState(() {
+            isLoading = false;
+            checkingUser = false;
+          });
           Navigator.of(context).pop();
           Fluttertoast.showToast(msg: 'Some error occured.Please try again');
         } else {
-         // Navigator.of(context).popUntil((route) => route.isFirst);
+          // Navigator.of(context).popUntil((route) => route.isFirst);
           Navigator.of(context).pushReplacementNamed('/home');
         }
       }
+    } else {
+      setState(() {
+        isLoadingDialog = false;
+        checkingUser = false;
+      });
     }
   }
 }

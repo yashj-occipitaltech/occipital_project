@@ -18,7 +18,7 @@ GetOrderData _$GetOrderDataFromJson(Map<String, dynamic> json) {
     (json['ImageURLs'] as List)?.map((e) => e as String)?.toList(),
     json['Commodity'] as String,
     json['Samples'] as int,
-    json['OrderNumber'] as String,
+    json['OrderNumber'] as int,
     json['CommodityStatus'] as String,
     json['PDFStatus'] as String,
     json['MarkerStatus'] as String,
@@ -36,7 +36,7 @@ GetOrderData _$GetOrderDataFromJson(Map<String, dynamic> json) {
     (json['Colors'] as List)?.map((e) => e as String)?.toList(),
     (json['Defects'] as List)
         ?.map((e) => (e as Map<String, dynamic>)?.map(
-              (k, e) => MapEntry(k, e as num),
+              (k, e) => MapEntry(k, e as String),
             ))
         ?.toList(),
     json['Status'] as String,

@@ -180,7 +180,7 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               final order = snapshot.data as GetOrderData;
-              //  print(order.toJson());
+               print(order.toJson());
               return ListView(
                 padding: EdgeInsets.all(16.0),
                 children: <Widget>[
@@ -188,19 +188,21 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
                       order.city ?? 'N/A',
                       '${order.date ?? 'N/A'}-${order.month ?? 'NA'}-${order.year ?? 'N/A'}',
                       order.time ?? 'N/A',
-                      order.ordernumber ?? 'N/A'),
+                      order.ordernumber.toString() ?? 'N/A'),
                   SizedBox(height: 15.0),
                   Text('Average Details of All Images'),
                   SizedBox(height: 15.0),
                   sizeTable(order.range, order.frequencyArray),
-                  SizedBox(height: 15.0),
+                  SizedBox(height: 5.0),
+                  Center(child: Text('*Scroll for more data',style: TextStyle(color: Colors.grey),)),
+                  // SizedBox(height: 5.0),
                   order.colorDetails == null
                       ? Center(
                           child: Text('No data available'),
                         )
                       : showPieChart(
                           order.colorDetails, order.colorRGB, order.colors),
-                  SizedBox(height: 15.0),
+                  //SizedBox(height: 15.0),
                   FlatButton(
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30.0)),
@@ -216,8 +218,9 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
                           MaterialPageRoute(
                               builder: (context) => OrderDetailScreen(order)));
                     },
-                  )
-                  //defectsCard(order.defects[0]['Defective'])
+                  ),
+                  SizedBox(height: 15.0,),
+                  defectsCard(order.defects,order.totalDefects)
                 ],
               );
             } else if (snapshot.hasError) {
@@ -306,37 +309,42 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
 
     return Center(
       child: Container(
+        height: 150.0,
         decoration: BoxDecoration(
             border: Border.all(), borderRadius: BorderRadius.circular(10.0)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            DataTable(
-              horizontalMargin: 10.0,
-              headingRowHeight: 25.0,
-              dataRowHeight: 30.0,
-              columnSpacing: 20.0,
-              columns: [
-                DataColumn(
-                  label: Text(
-                    'Size(mm)',
-                  ),
+        child: Scrollbar(
+                  child: SingleChildScrollView(
+                    child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                DataTable(
+                  horizontalMargin: 10.0,
+                  headingRowHeight: 25.0,
+                  dataRowHeight: 30.0,
+                  columnSpacing: 20.0,
+                  columns: [
+                    DataColumn(
+                      label: Text(
+                        'Size(mm)',
+                      ),
+                    ),
+                    DataColumn(label: Text('Percentage'))
+                  ],
+                  rows: [
+                    for (int i = 0; i < range.length - 1; i++)
+                      DataRow(cells: [
+                        DataCell(
+                            Center(child: Text('${range[i]}-${range[i + 1]}'))),
+                        DataCell(Center(
+                            child: Text(
+                                '${num.parse(totalFreq[i].toString()).toStringAsFixed(2)} %')))
+                      ]),
+                  ],
                 ),
-                DataColumn(label: Text('Percentage'))
-              ],
-              rows: [
-                for (int i = 0; i < range.length - 1; i++)
-                  DataRow(cells: [
-                    DataCell(
-                        Center(child: Text('${range[i]}-${range[i + 1]}'))),
-                    DataCell(Center(
-                        child: Text(
-                            '${num.parse(totalFreq[i].toString()).toStringAsFixed(2)} %')))
-                  ]),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -429,8 +437,13 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
   }
 
 
-  Widget defectsCard(double defect) {
-    final _defectVal = num.parse((defect * 100).toStringAsFixed(0));
+  Widget defectsCard(List<Map<String,String>> data,List<String> totalDefects) {
+    num _defectVal ;
+    // for (var item in totalDefects) {
+    //  _defectVal =
+    //       (data.map((m) => num.parse(m[item])).reduce((a, b) => a + b) / data.length) *
+    //           100;
+    // }
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
       child: Padding(
@@ -441,13 +454,13 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
             Text('Defects', style: TextStyle(fontSize: 16.0)),
             Container(
               padding: EdgeInsets.all(10.0),
-              width: 60.0,
+              width: 90.0,
               decoration: BoxDecoration(
                   color: Colors.black,
                   borderRadius: BorderRadius.circular(30.0)),
               child: Center(
                   child: Text(
-                '$_defectVal%',
+                '${data[0]['Defective']}',
                 style: TextStyle(color: Colors.white),
                 textAlign: TextAlign.center,
               )),

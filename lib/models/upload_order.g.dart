@@ -18,6 +18,7 @@ UploadOrder _$UploadOrderFromJson(Map<String, dynamic> json) {
     json['UserType'] as String,
     json['Token'] as String,
     json['descriptiomn'] as String,
+    json['Address'] as String,
   );
 }
 
@@ -33,4 +34,5 @@ Map<String, dynamic> _$UploadOrderToJson(UploadOrder instance) =>
       'UserType': instance.userType,
       'Token': instance.token,
       'descriptiomn': instance.description,
+      'Address': instance.address,
     };

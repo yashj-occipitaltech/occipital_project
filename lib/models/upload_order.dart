@@ -25,9 +25,10 @@ class UploadOrder{
   String token;
   @JsonKey(name:'descriptiomn')
   String description;
-  
+  @JsonKey(name:'Address')
+  String address;
 
-  UploadOrder(this.user,this.time,this.date,this.month,this.year,this.city,this.commodity,this.userType,this.token,this.description);
+  UploadOrder(this.user,this.time,this.date,this.month,this.year,this.city,this.commodity,this.userType,this.token,this.description,this.address);
   factory UploadOrder.fromJson(Map<String, dynamic> json) => _$UploadOrderFromJson(json);
 
    Map<String, dynamic> toJson() => _$UploadOrderToJson(this);

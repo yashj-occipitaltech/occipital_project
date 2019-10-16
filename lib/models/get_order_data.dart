@@ -25,7 +25,7 @@ class GetOrderData {
   @JsonKey(name: 'Samples')
   int samples;
   @JsonKey(name: 'OrderNumber')
-  String ordernumber;
+  int ordernumber;
   @JsonKey(name: 'CommodityStatus')
   String commodityStatus;
   @JsonKey(name: 'PDFStatus')
@@ -45,7 +45,7 @@ class GetOrderData {
   @JsonKey(name: 'ColorRGB')
   Map<String,String> colorRGB;
   @JsonKey(name: 'Defects')
-  List<Map<String, num>> defects;
+  List<Map<String, String>> defects;
   @JsonKey(name: 'Status')
   String status;
   @JsonKey(name: 'ResultCode')

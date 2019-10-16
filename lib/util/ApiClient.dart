@@ -121,7 +121,8 @@ class ApiClient {
         ApiEndpoints.baseUrl + ApiEndpoints.getOrderData,
         body: json.encode(order));
 
-    print(response.body.toString());
+    print(GetOrderData.fromJson(json.decode(response.body)).defects);
+    print(GetOrderData.fromJson(json.decode(response.body)).totalDefects);
 
     return GetOrderData.fromJson(json.decode(response.body));
   }
@@ -131,7 +132,7 @@ class ApiClient {
         ApiEndpoints.baseUrl + ApiEndpoints.getLastSomeOrders,
         body: json.encode(order));
 
-  //  print(response.body.toString());
+    print(response.body.toString());
 
     return OrdersData.fromJson(json.decode(response.body));
   }
