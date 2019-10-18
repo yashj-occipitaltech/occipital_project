@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:occipital_tech/models/get_orderId.dart';
 import 'package:occipital_tech/models/orders_data.dart';
 import 'package:occipital_tech/screens/OrderDataTiles.dart';
@@ -16,8 +17,10 @@ class PreviousData extends StatefulWidget {
 }
 
 class _PreviousDataState extends State<PreviousData> {
-  String _defaultMonth = "January";
   String _defaultYear = "2019";
+  final now = DateTime.now();
+  String _defaultMonth = DateFormat("MMMM").format(DateTime.now()).toString();
+  
 
   Map<String, String> mappedVAL = {
     "January": "01",
@@ -80,7 +83,6 @@ class _PreviousDataState extends State<PreviousData> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Column(
-      //padding: EdgeInsets.all(16.0),
       children: <Widget>[
         Padding(
           padding: EdgeInsets.all(16.0),

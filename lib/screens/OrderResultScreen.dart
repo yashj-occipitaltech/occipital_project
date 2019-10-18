@@ -1,4 +1,6 @@
 // import 'package:fl_chart/fl_chart.dart';
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:occipital_tech/models/get_order_data.dart';
@@ -16,8 +18,9 @@ import 'package:pie_chart/pie_chart.dart';
 import 'dart:math' as math;
 import 'package:occipital_tech/util/colorValues.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-// import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter_circular_chart/flutter_circular_chart.dart';
+import 'package:share_extend/share_extend.dart';
 
 class OrderResultScreen extends StatefulWidget {
   final String orderId;
@@ -46,14 +49,13 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
       var dir = await getApplicationDocumentsDirectory();
       print(dir.path);
       print(url);
-      await dio.download(url, "${dir.path}/url.pdf",
+      await dio.download(url, "${dir.path}/${orderData.value.orderId}.pdf",
           onReceiveProgress: (rec, total) {
-        // print("Rec: $rec , Total: $total");
         if (!mounted) {
           return;
         }
         setState(() {
-          fileUrl = "${dir.path}/url.pdf";
+          fileUrl = "${dir.path}/${orderData.value.orderId}.pdf";
           downloading = true;
           progressString = ((rec / total) * 100).toStringAsFixed(0) + "%";
         });
@@ -110,8 +112,11 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
                             padding: const EdgeInsets.only(right: 15.0),
                             child: Icon(Icons.share),
                           ),
-                          onTap: () {
-                            Share.share(data.pdfPath);
+                          onTap: ()async {
+                            await downloadFile(data.pdfPath).then((dat){
+                             ShareExtend.share(fileUrl, "file");
+                            });
+                           
                           },
                         )
                       : Container();
@@ -159,6 +164,7 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
           : progressString == 'Completed'
               ? InkWell(
                   onTap: () {
+                    print(fileUrl);
                     OpenFile.open(fileUrl);
                   },
                   child: Container(
@@ -180,7 +186,7 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               final order = snapshot.data as GetOrderData;
-               print(order.toJson());
+              print(order.toJson());
               return ListView(
                 padding: EdgeInsets.all(16.0),
                 children: <Widget>[
@@ -194,13 +200,17 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
                   SizedBox(height: 15.0),
                   sizeTable(order.range, order.frequencyArray),
                   SizedBox(height: 5.0),
-                  Center(child: Text('*Scroll for more data',style: TextStyle(color: Colors.grey),)),
+                  Center(
+                      child: Text(
+                    '*Scroll for more data',
+                    style: TextStyle(color: Colors.grey),
+                  )),
                   // SizedBox(height: 5.0),
                   order.colorDetails == null
                       ? Center(
                           child: Text('No data available'),
                         )
-                      : showPieChart(
+                      : pieCharts(
                           order.colorDetails, order.colorRGB, order.colors),
                   //SizedBox(height: 15.0),
                   FlatButton(
@@ -219,8 +229,10 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
                               builder: (context) => OrderDetailScreen(order)));
                     },
                   ),
-                  SizedBox(height: 15.0,),
-                  defectsCard(order.defects,order.totalDefects)
+                  SizedBox(
+                    height: 15.0,
+                  ),
+                  defectsCard(order.defects, order.totalDefects)
                 ],
               );
             } else if (snapshot.hasError) {
@@ -313,8 +325,8 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
         decoration: BoxDecoration(
             border: Border.all(), borderRadius: BorderRadius.circular(10.0)),
         child: Scrollbar(
-                  child: SingleChildScrollView(
-                    child: Column(
+          child: SingleChildScrollView(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -352,9 +364,8 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
 
   Widget pieCharts(List<Map<String, double>> data, Map<String, String> colorVal,
       List<String> colors) {
-    Map<String, double> dataMap = Map<String, double>();
-    // List avgArr = [];
-    // List<Map<String, double>> dataTwo = [];
+        
+    List<charts.Series<PieChartData, String>> _seriesPieData = List();
     List<PieChartData> pieData = List<PieChartData>();
     for (var item in colors) {
       var result =
@@ -362,51 +373,66 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
               100;
       var myInt = int.parse("0xFF${colorVal[item].substring(1)}");
       pieData.add(PieChartData(Color(myInt), result, item));
-      // avgArr.add(result);
-      // dataTwo.add({"$item": result});
     }
+    _seriesPieData.add(
+      charts.Series(
+        insideLabelStyleAccessorFn: (data,int index) => charts.TextStyleSpec(fontSize: 14),
 
-    return Container();
-    // data.forEach((k, v) {
-    //   dataMap[k] = v * 100;
-    // });
-    // print(dataMap);
-    // return PieChart(
-    //   dataMap: dataMap,
-    //   legendFontColor: Colors.blueGrey[900],
-    //   legendFontSize: 14.0,
-    //   legendFontWeight: FontWeight.w500,
-    //   animationDuration: Duration(milliseconds: 800),
-    //   chartLegendSpacing: 32.0,
-    //   chartRadius: MediaQuery.of(context).size.width / 1.6,
-    //   showChartValuesInPercentage: true,
-    //   showChartValues: true,
-    //   chartValuesColor: Colors.blueGrey[900].withOpacity(0.9),
-    //   colorList: [Colors.orange, Colors.red, Colors.yellow, Colors.green],
-    //   showLegends: false,
-    //   initialAngle: math.pi * 0.5,
-    // );
+        displayName: 'Data',
+        domainFn: (PieChartData data, _) => data.x,
+        measureFn: (PieChartData data, _) => data.y,
+        colorFn: (PieChartData data, _) =>
+            charts.ColorUtil.fromDartColor(data.color),
+        id: 'Order Color Chart',
+        data: pieData,
+        labelAccessorFn: (PieChartData row, _) => '${num.parse(row.y.toString()).toStringAsFixed(2)}%',
+      ),
+    );
+    return Padding(
+      padding:  EdgeInsets.all(8.0),
+      child: Container(
+        height: 350.0,
+        child: charts.PieChart(_seriesPieData,
+            
+            animate: true,
+            animationDuration: Duration(milliseconds: 300),
+            behaviors: [
+               charts.DatumLegend(
+                outsideJustification: charts.OutsideJustification.endDrawArea,
+                horizontalFirst: false,
+                desiredMaxRows: 2,
+                cellPadding:  EdgeInsets.only(right: 4.0, bottom: 4.0),
+                showMeasures: true
+              )
+            ],
+            defaultRenderer:  charts.ArcRendererConfig(
+                arcWidth: 100,
+                arcRendererDecorators: [
+                   charts.ArcLabelDecorator(
+                      labelPosition: charts.ArcLabelPosition.inside)
+                ])),
+      ),
+    );
   }
 
-  Widget showPieChart(List<Map<String, double>> data, Map<String, String> colorVal,
-      List<String> colors){
-     List<CircularSegmentEntry> pieData = List<CircularSegmentEntry>();
+  Widget showPieChart(List<Map<String, double>> data,
+      Map<String, String> colorVal, List<String> colors) {
+    List<CircularSegmentEntry> pieData = List<CircularSegmentEntry>();
     for (var item in colors) {
       var result =
           (data.map((m) => m[item]).reduce((a, b) => a + b) / data.length) *
               100;
       var myInt = int.parse("0xFF${colorVal[item].substring(1)}");
-      pieData.add(CircularSegmentEntry(result,Color(myInt)));
-      
+      pieData.add(CircularSegmentEntry(result, Color(myInt)));
     }
     return AnimatedCircularChart(
-    //key: _chartKey,
-    size: const Size(300.0, 300.0),
-    initialChartData: [CircularStackEntry(pieData)],
-    chartType: CircularChartType.Pie,
-  );
+      //key: _chartKey,
+      size: const Size(300.0, 300.0),
+      initialChartData: [CircularStackEntry(pieData)],
+      chartType: CircularChartType.Pie,
+    );
   }
-  
+
   Widget buildPieChart(List<Map<String, double>> data,
       Map<String, String> colorVal, List<String> colors) {
     List<PieChartData> pieData = List<PieChartData>();
@@ -436,9 +462,9 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
     );
   }
 
-
-  Widget defectsCard(List<Map<String,String>> data,List<String> totalDefects) {
-    num _defectVal ;
+  Widget defectsCard(
+      List<Map<String, String>> data, List<String> totalDefects) {
+    num _defectVal;
     // for (var item in totalDefects) {
     //  _defectVal =
     //       (data.map((m) => num.parse(m[item])).reduce((a, b) => a + b) / data.length) *
@@ -496,5 +522,3 @@ class PieChartData {
 
   PieChartData(this.color, this.y, this.x);
 }
-
-

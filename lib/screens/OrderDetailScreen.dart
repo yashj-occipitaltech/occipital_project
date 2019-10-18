@@ -3,8 +3,9 @@ import 'package:flutter_circular_chart/flutter_circular_chart.dart';
 import 'package:flutter_image/network.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:occipital_tech/models/get_order_data.dart';
+import 'package:occipital_tech/screens/OrderResultScreen.dart';
 import 'package:occipital_tech/util/widgets.dart';
-
+import 'package:charts_flutter/flutter.dart' as charts;
 class OrderDetailScreen extends StatefulWidget {
   final GetOrderData orderData;
   OrderDetailScreen(this.orderData);
@@ -59,8 +60,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   setState(() {
                     indexImg = index;
                   });
-                  _changePieData(widget.orderData.colorDetails[index],
-                          widget.orderData.colorRGB, widget.orderData.colors);
+                  // _changePieData(widget.orderData.colorDetails[index],
+                  //         widget.orderData.colorRGB, widget.orderData.colors);
                 },
                 loop: false,
                 itemCount: widget.orderData.imageURLs.length,
@@ -81,7 +82,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   ? sizeDetail(widget.orderData.range,
                       widget.orderData.frequencyArray[indexImg])
                   : _selectedTab == 2
-                      ? colorDetail(widget.orderData.colorDetails[indexImg],
+                      ? pieCharts(widget.orderData.colorDetails[indexImg],
                           widget.orderData.colorRGB, widget.orderData.colors)
                       : Padding(padding: EdgeInsets.symmetric(vertical: 120.0,horizontal: 16.0),child: defectsDetail(widget.orderData.defects[indexImg],widget.orderData.totalDefects),),
             )
@@ -176,6 +177,54 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       initialChartData: [CircularStackEntry(pieData)],
       chartType: CircularChartType.Pie,
       percentageValues: true,
+    );
+  }
+
+   Widget pieCharts(Map<String, double> colorDetail,
+      Map<String, String> colorVal, List<String> colors) {
+        
+    List<charts.Series<PieChartData, String>> _seriesPieData = List();
+    List<PieChartData> pieData = List<PieChartData>();
+    for (var item in colors) {
+      var result = colorDetail[item] * 100;
+      var myInt = int.parse("0xFF${colorVal[item].substring(1)}");
+      pieData.add(PieChartData(Color(myInt), result, item));
+    }
+    _seriesPieData.add(
+      charts.Series(
+        insideLabelStyleAccessorFn: (data,int index) => charts.TextStyleSpec(),
+        domainFn: (PieChartData data, _) => data.x,
+        measureFn: (PieChartData data, _) => data.y,
+        colorFn: (PieChartData data, _) =>
+            charts.ColorUtil.fromDartColor(data.color),
+        id: 'Order Color Chart',
+        data: pieData,
+        labelAccessorFn: (PieChartData row, _) => '${num.parse(row.y.toString()).toStringAsFixed(2)}%',
+      ),
+    );
+    return Padding(
+      padding:  EdgeInsets.all(8.0),
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.45,
+        child: charts.PieChart(_seriesPieData,
+            animate: true,
+            animationDuration: Duration(milliseconds: 300),
+            behaviors: [
+               charts.DatumLegend(
+                outsideJustification: charts.OutsideJustification.endDrawArea,
+                horizontalFirst: false,
+                desiredMaxRows: 2,
+                cellPadding:  EdgeInsets.only(right: 4.0, bottom: 4.0),
+                
+              )
+            ],
+            defaultRenderer:  charts.ArcRendererConfig(
+                arcWidth: 100,
+                arcRendererDecorators: [
+                   charts.ArcLabelDecorator(
+                      labelPosition: charts.ArcLabelPosition.inside)
+                ])),
+      ),
     );
   }
 

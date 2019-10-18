@@ -52,6 +52,7 @@ dependencies:
   geolocator: ^5.1.4+1
   geocoder: ^0.2.1
   location_permissions: ^2.0.3
+  share_extend: ^1.0.9
 
   
   

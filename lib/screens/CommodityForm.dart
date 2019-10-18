@@ -109,6 +109,19 @@ class _CommodityFormState extends State<CommodityForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: RaisedButton(
+        color: Color(0XFF01AF51),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text('UPLOAD ORDER',style:TextStyle(color: Colors.white,fontSize: 16.0)),
+            SizedBox(width:5.0),
+            Icon(Icons.check_circle,color: Colors.white,size: 20.0,)
+          ],
+        ),
+        padding: EdgeInsets.all(16.0),
+        onPressed: ()async=>_onFormSubmmited(),
+      ),
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.black),
         elevation: 0.0,
@@ -118,15 +131,16 @@ class _CommodityFormState extends State<CommodityForm> {
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
-        actions: <Widget>[
-          Padding(
-            padding: EdgeInsets.all(10.0),
-            child: InkWell(
-              onTap: () async => _onFormSubmmited(),
-              child: Icon(Icons.check),
-            ),
-          )
-        ],
+        
+        // actions: <Widget>[
+        //   Padding(
+        //     padding: EdgeInsets.all(10.0),
+        //     child: InkWell(
+        //       onTap: () async => _onFormSubmmited(),
+        //       child: Icon(Icons.check),
+        //     ),
+        //   )
+        // ],
       ),
       body: Form(
         key: _formKeyCommodity,
