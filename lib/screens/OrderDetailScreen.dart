@@ -41,7 +41,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        appBar: Widgets.appBar('Order Detail'),
+        appBar: Widgets.appBar('Order Detail',backToHome: false,context: context),
         body: Column(
           children: <Widget>[
             SizedBox(

@@ -10,7 +10,7 @@ class HelpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
        drawer: AppDrawer(),
-      appBar: Widgets.appBar('Help'),
+      appBar: Widgets.appBar('Help',backToHome:true,context:context),
       body: Center(
         child: Text('Help Here'),
       ),

@@ -35,7 +35,7 @@ class _BottomNavigatorState extends State<BottomNavigator> {
         appBar: appBarTitle == "Home"
             ? null
             : Widgets.appBar(appBarTitle,
-                showRefresh: appBarTitle == "Home" ? true : false),
+               showLeading: false ),
         drawer: AppDrawer(),
         floatingActionButtonLocation:
             FloatingActionButtonLocation.centerDocked,

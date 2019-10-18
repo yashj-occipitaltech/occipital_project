@@ -17,7 +17,7 @@ class _ContactScreenState extends State<ContactScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: AppDrawer(),
-      appBar: Widgets.appBar('Contact Us'),
+      appBar: Widgets.appBar('Contact Us',backToHome:true,context:context),
       body: Form(
         key: _formKeyContacts,
         child: SingleChildScrollView(

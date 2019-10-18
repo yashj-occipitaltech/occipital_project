@@ -169,12 +169,12 @@ class _OrderDataTilesState extends State<OrderDataTiles> {
               width: 120.0,
               padding: EdgeInsets.all(10.0),
               child: Text(
-                'Loading',
+                'Processing 0 %',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.white),
               ),
               decoration: BoxDecoration(
-                  color: getColorForStatus('Loading'),
+                  color: getColorForStatus('Processing 0%'),
                   borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(50.0),
                       bottomLeft: Radius.circular(50.0))),

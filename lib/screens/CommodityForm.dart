@@ -406,6 +406,7 @@ class _CommodityFormState extends State<CommodityForm> {
         final responseData = json.decode(result.response);
 
         Fluttertoast.showToast(msg: 'Successfully Uploaded');
+        Navigator.of(context).popUntil((route) => route.isFirst);
         Navigator.pushReplacementNamed(context, '/home',
             arguments: ScreenArgs(responseData['OrderId']));
       }

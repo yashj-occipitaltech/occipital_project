@@ -81,9 +81,14 @@ class _AppDrawerState extends State<AppDrawer> {
           )
         ],
       ),
-      onTap: () => Navigator.pushReplacement(
+      onTap: () => name == 'Home' ? homeRoute() : Navigator.push(
           context, MaterialPageRoute(builder: (context) => screen)),
     );
+  }
+
+  void homeRoute(){
+     Navigator.of(context).popUntil((route) => route.isFirst);
+     Navigator.of(context).pop();
   }
 
   void _showDialog() {

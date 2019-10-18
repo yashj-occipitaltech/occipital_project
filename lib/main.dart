@@ -76,6 +76,7 @@ class _MyAppState extends State<MyApp> {
         model: locator<UserModel>(),
         child: MaterialApp(
             debugShowCheckedModeBanner: false,
+            
             routes: {
               '/home': (context) => BottomNavigator(),
               '/signup': (context) => SignUpScreen(),

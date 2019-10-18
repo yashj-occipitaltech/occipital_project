@@ -12,11 +12,7 @@ import 'package:occipital_tech/util/widgets.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/subjects.dart';
-import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:pie_chart/pie_chart.dart';
-import 'dart:math' as math;
-import 'package:occipital_tech/util/colorValues.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter_circular_chart/flutter_circular_chart.dart';
@@ -112,11 +108,19 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
                             padding: const EdgeInsets.only(right: 15.0),
                             child: Icon(Icons.share),
                           ),
-                          onTap: ()async {
-                            await downloadFile(data.pdfPath).then((dat){
-                             ShareExtend.share(fileUrl, "file");
-                            });
-                           
+                          onTap: () async {
+                            var dir = await getApplicationDocumentsDirectory();
+                            File pdfFile = new File(
+                                "${dir.path}/${orderData.value.orderId}.pdf");
+                            print(await pdfFile.exists());
+                            if (await pdfFile.exists()) {
+                             
+                              ShareExtend.share("${dir.path}/${orderData.value.orderId}.pdf", "file");
+                            } else {
+                              await downloadFile(data.pdfPath).then((dat) {
+                                ShareExtend.share(fileUrl, "file");
+                              });
+                            }
                           },
                         )
                       : Container();
@@ -364,7 +368,6 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
 
   Widget pieCharts(List<Map<String, double>> data, Map<String, String> colorVal,
       List<String> colors) {
-        
     List<charts.Series<PieChartData, String>> _seriesPieData = List();
     List<PieChartData> pieData = List<PieChartData>();
     for (var item in colors) {
@@ -376,8 +379,8 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
     }
     _seriesPieData.add(
       charts.Series(
-        insideLabelStyleAccessorFn: (data,int index) => charts.TextStyleSpec(fontSize: 14),
-
+        insideLabelStyleAccessorFn: (data, int index) =>
+            charts.TextStyleSpec(fontSize: 14),
         displayName: 'Data',
         domainFn: (PieChartData data, _) => data.x,
         measureFn: (PieChartData data, _) => data.y,
@@ -385,30 +388,29 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
             charts.ColorUtil.fromDartColor(data.color),
         id: 'Order Color Chart',
         data: pieData,
-        labelAccessorFn: (PieChartData row, _) => '${num.parse(row.y.toString()).toStringAsFixed(2)}%',
+        labelAccessorFn: (PieChartData row, _) =>
+            '${num.parse(row.y.toString()).toStringAsFixed(2)}%',
       ),
     );
     return Padding(
-      padding:  EdgeInsets.all(8.0),
+      padding: EdgeInsets.all(8.0),
       child: Container(
         height: 350.0,
         child: charts.PieChart(_seriesPieData,
-            
             animate: true,
             animationDuration: Duration(milliseconds: 300),
             behaviors: [
-               charts.DatumLegend(
-                outsideJustification: charts.OutsideJustification.endDrawArea,
-                horizontalFirst: false,
-                desiredMaxRows: 2,
-                cellPadding:  EdgeInsets.only(right: 4.0, bottom: 4.0),
-                showMeasures: true
-              )
+              charts.DatumLegend(
+                  outsideJustification: charts.OutsideJustification.endDrawArea,
+                  horizontalFirst: false,
+                  desiredMaxRows: 2,
+                  cellPadding: EdgeInsets.only(right: 4.0, bottom: 4.0),
+                  showMeasures: true)
             ],
-            defaultRenderer:  charts.ArcRendererConfig(
+            defaultRenderer: charts.ArcRendererConfig(
                 arcWidth: 100,
                 arcRendererDecorators: [
-                   charts.ArcLabelDecorator(
+                  charts.ArcLabelDecorator(
                       labelPosition: charts.ArcLabelPosition.inside)
                 ])),
       ),

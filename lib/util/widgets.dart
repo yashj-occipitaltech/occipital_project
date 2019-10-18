@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 
 
 class Widgets{
-  static Widget appBar(String title,{bool showRefresh=false}){
+  static Widget appBar(String title,{bool backToHome=false,BuildContext context,bool showLeading}){
     return AppBar(
-      actions: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(right:15.0),
-          child: showRefresh ? InkWell(onTap: (){},child: Icon(Icons.refresh)):Container(),
-        )
-      ],
+      leading: backToHome ? InkWell(child: Icon(Icons.arrow_back),onTap: (){
+        Navigator.pushNamed(context, '/home');
+      },):InkWell(child: Icon(Icons.arrow_back),onTap: (){
+        Navigator.pop(context);
+      },),
       iconTheme:  IconThemeData(color: Colors.black),
       elevation: 0.0,
       title: Text(title,style: TextStyle(color: Colors.black),),

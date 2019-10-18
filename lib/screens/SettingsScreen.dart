@@ -37,7 +37,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: Widgets.appBar('Settings'),
+      appBar: Widgets.appBar('Settings',backToHome:true,context:context),
       drawer: AppDrawer(),
       body: ListView(
         padding: EdgeInsets.all(16.0),
