@@ -2,10 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:occipital_tech/enums/view_state.dart';
 import 'package:occipital_tech/models/user_check.dart';
 import 'package:occipital_tech/scoped_models/user_model.dart';
-import 'package:occipital_tech/util/ApiClient.dart';
 import 'package:occipital_tech/util/locator.dart';
 import 'package:pin_code_text_field/pin_code_text_field.dart';
 import 'package:scoped_model/scoped_model.dart';
@@ -185,9 +183,7 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
                                 fontSize: 16.0, color: Colors.white),
                           ),
                           onPressed: () async {
-                             setState(() {
-                                isLoadingDialog = true;
-                              });
+                            
                             final user = await _auth.currentUser();
                            
                             if (smsOTP.isEmpty || smsOTP.length < 6) {
@@ -195,7 +191,7 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
                                   msg: 'Please enter the OTP');
                               setState(() {
                                 hasError = true;
-                                isLoadingDialog = false;
+                                //isLoadingDialog = false;
                               });
                             } else {
                               
@@ -320,10 +316,6 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
   }
 
   _onButtonPressed(FirebaseUser user) async {
-    setState(() {
-      // isLoadingDialog = f;
-      // checkingUser = true;
-    });
     final userVerified = await signIn();
 
     if (userVerified == true) {
@@ -350,10 +342,10 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
         }
       }
     } else {
-      setState(() {
-        isLoadingDialog = false;
-        checkingUser = false;
-      });
+      // setState(() {
+      //   isLoadingDialog = false;
+      //   checkingUser = false;
+      // });
     }
   }
 }

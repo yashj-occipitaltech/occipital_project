@@ -12,6 +12,3 @@ class ApiEndpoints{
 }
 
 
-class Values{
-  static const int uploadsAllowed = 5;
-}

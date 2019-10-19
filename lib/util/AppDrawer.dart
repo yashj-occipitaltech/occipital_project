@@ -4,10 +4,8 @@ import 'package:occipital_tech/scoped_models/user_model.dart';
 import 'package:occipital_tech/screens/BottomNavigator.dart';
 import 'package:occipital_tech/screens/ContactScreen.dart';
 import 'package:occipital_tech/screens/HelpScreen.dart';
-import 'package:occipital_tech/screens/RecentOrdersScreen.dart';
 import 'package:occipital_tech/screens/SettingsScreen.dart';
 import 'package:occipital_tech/util/locator.dart';
-import 'package:occipital_tech/util/colorValues.dart';
 
 class AppDrawer extends StatefulWidget {
   @override
@@ -27,7 +25,6 @@ class _AppDrawerState extends State<AppDrawer> {
               Container(
                 height: MediaQuery.of(context).size.height * 0.3,
                 decoration: BoxDecoration(
-                    //border:Border.all() ,
                     image: DecorationImage(
                         image: ExactAssetImage('assets/home_logo.png'),
                         fit: BoxFit.fitWidth)),

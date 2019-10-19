@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:occipital_tech/models/store_user.dart';
-import 'package:occipital_tech/models/user_check.dart';
 import 'package:occipital_tech/models/verify_trader.dart';
 import 'package:occipital_tech/scoped_models/user_model.dart';
-import 'package:occipital_tech/util/ApiClient.dart';
 import 'package:occipital_tech/util/result_codes.dart';
 import 'package:occipital_tech/util/widgets.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:occipital_tech/util/colorValues.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override

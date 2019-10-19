@@ -33,20 +33,20 @@ class _MyAppState extends State<MyApp> {
 
   void initState() {
     super.initState();
-    subscription = Connectivity()
-        .onConnectivityChanged
-        .listen((ConnectivityResult result) async {
-      if (result != ConnectivityResult.none) {
-        var isDeviceConnected = await DataConnectionChecker().hasConnection;
-        setState(() {
-          _isDeviceConnected = isDeviceConnected;
-        });
-      } else if (result == ConnectivityResult.none) {
-        setState(() {
-          _isDeviceConnected = false;
-        });
-      }
-    });
+    // subscription = Connectivity()
+    //     .onConnectivityChanged
+    //     .listen((ConnectivityResult result) async {
+    //   if (result != ConnectivityResult.none) {
+    //     var isDeviceConnected = await DataConnectionChecker().hasConnection;
+    //     setState(() {
+    //       _isDeviceConnected = isDeviceConnected;
+    //     });
+    //   } else if (result == ConnectivityResult.none) {
+    //     setState(() {
+    //       _isDeviceConnected = false;
+    //     });
+    //   }
+    // });
     model.autoLogin();
     model.userSubject.listen((bool isAuthenticated) {
       setState(() {
@@ -70,13 +70,9 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    //showPrefs();
-    //print(_isDeviceConnected);
     return ScopedModel<UserModel>(
         model: locator<UserModel>(),
         child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            
             routes: {
               '/home': (context) => BottomNavigator(),
               '/signup': (context) => SignUpScreen(),
@@ -87,8 +83,6 @@ class _MyAppState extends State<MyApp> {
             // themeMode: ThemeMode.dark,
             theme: ThemeData(
               primarySwatch: Colors.green,
-
-              // bottomAppBarColor: Colors.green,
             ),
             home: _isAuthenticated ? BottomNavigator() : LoginOTPScreen()));
   }

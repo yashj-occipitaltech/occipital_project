@@ -1,21 +1,16 @@
-// import 'package:fl_chart/fl_chart.dart';
-import 'dart:io';
 
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:occipital_tech/models/get_order_data.dart';
 import 'package:occipital_tech/models/order_status_check.dart';
-import 'package:occipital_tech/models/orders_data.dart';
 import 'package:occipital_tech/screens/OrderDetailScreen.dart';
 import 'package:occipital_tech/util/ApiClient.dart';
-import 'package:occipital_tech/util/widgets.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
-import 'package:flutter_circular_chart/flutter_circular_chart.dart';
 import 'package:share_extend/share_extend.dart';
 
 class OrderResultScreen extends StatefulWidget {
@@ -417,52 +412,52 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
     );
   }
 
-  Widget showPieChart(List<Map<String, double>> data,
-      Map<String, String> colorVal, List<String> colors) {
-    List<CircularSegmentEntry> pieData = List<CircularSegmentEntry>();
-    for (var item in colors) {
-      var result =
-          (data.map((m) => m[item]).reduce((a, b) => a + b) / data.length) *
-              100;
-      var myInt = int.parse("0xFF${colorVal[item].substring(1)}");
-      pieData.add(CircularSegmentEntry(result, Color(myInt)));
-    }
-    return AnimatedCircularChart(
-      //key: _chartKey,
-      size: const Size(300.0, 300.0),
-      initialChartData: [CircularStackEntry(pieData)],
-      chartType: CircularChartType.Pie,
-    );
-  }
+  // Widget showPieChart(List<Map<String, double>> data,
+  //     Map<String, String> colorVal, List<String> colors) {
+  //   List<CircularSegmentEntry> pieData = List<CircularSegmentEntry>();
+  //   for (var item in colors) {
+  //     var result =
+  //         (data.map((m) => m[item]).reduce((a, b) => a + b) / data.length) *
+  //             100;
+  //     var myInt = int.parse("0xFF${colorVal[item].substring(1)}");
+  //     pieData.add(CircularSegmentEntry(result, Color(myInt)));
+  //   }
+  //   return AnimatedCircularChart(
+  //     //key: _chartKey,
+  //     size: const Size(300.0, 300.0),
+  //     initialChartData: [CircularStackEntry(pieData)],
+  //     chartType: CircularChartType.Pie,
+  //   );
+  // }
 
-  Widget buildPieChart(List<Map<String, double>> data,
-      Map<String, String> colorVal, List<String> colors) {
-    List<PieChartData> pieData = List<PieChartData>();
-    for (var item in colors) {
-      var result =
-          (data.map((m) => m[item]).reduce((a, b) => a + b) / data.length) *
-              100;
-      var myInt = int.parse("0xFF${colorVal[item].substring(1)}");
-      pieData.add(PieChartData(Color(myInt), result, item));
-      // avgArr.add(result);
-      // dataTwo.add({"$item": result});
-    }
-    return Center(
-      child: Container(
-        height: 300.0,
-        width: 300.0,
-        child: SfCircularChart(
-          series: [
-            PieSeries(
-                dataSource: pieData,
-                pointColorMapper: (data, _) => data.color,
-                xValueMapper: (data, _) => data.x,
-                yValueMapper: (data, _) => data.y)
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget buildPieChart(List<Map<String, double>> data,
+  //     Map<String, String> colorVal, List<String> colors) {
+  //   List<PieChartData> pieData = List<PieChartData>();
+  //   for (var item in colors) {
+  //     var result =
+  //         (data.map((m) => m[item]).reduce((a, b) => a + b) / data.length) *
+  //             100;
+  //     var myInt = int.parse("0xFF${colorVal[item].substring(1)}");
+  //     pieData.add(PieChartData(Color(myInt), result, item));
+  //     // avgArr.add(result);
+  //     // dataTwo.add({"$item": result});
+  //   }
+  //   return Center(
+  //     child: Container(
+  //       height: 300.0,
+  //       width: 300.0,
+  //       child: SfCircularChart(
+  //         series: [
+  //           PieSeries(
+  //               dataSource: pieData,
+  //               pointColorMapper: (data, _) => data.color,
+  //               xValueMapper: (data, _) => data.x,
+  //               yValueMapper: (data, _) => data.y)
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget defectsCard(
       List<Map<String, String>> data, List<String> totalDefects) {

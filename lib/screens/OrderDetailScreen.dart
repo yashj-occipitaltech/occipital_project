@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_circular_chart/flutter_circular_chart.dart';
+// import 'package:flutter_circular_chart/flutter_circular_chart.dart';
 import 'package:flutter_image/network.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:occipital_tech/models/get_order_data.dart';
@@ -18,7 +18,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   int _selectedTab = 1;
   int indexImg = 0;
 
-  final GlobalKey<AnimatedCircularChartState> _chartKey = new GlobalKey<AnimatedCircularChartState>();
+  // final GlobalKey<AnimatedCircularChartState> _chartKey = new GlobalKey<AnimatedCircularChartState>();
   
   
 
@@ -162,23 +162,23 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 
-  Widget colorDetail(Map<String, double> colorDetail,
-      Map<String, String> colorVal, List<String> colors) {
-    List<CircularSegmentEntry> pieData = List<CircularSegmentEntry>();
-    for (var item in colors) {
-      var result = colorDetail[item] * 100;
-      var myInt = int.parse("0xFF${colorVal[item].substring(1)}");
-      pieData.add(CircularSegmentEntry(result, Color(myInt)));
-    }
+  // Widget colorDetail(Map<String, double> colorDetail,
+  //     Map<String, String> colorVal, List<String> colors) {
+  //   List<CircularSegmentEntry> pieData = List<CircularSegmentEntry>();
+  //   for (var item in colors) {
+  //     var result = colorDetail[item] * 100;
+  //     var myInt = int.parse("0xFF${colorVal[item].substring(1)}");
+  //     pieData.add(CircularSegmentEntry(result, Color(myInt)));
+  //   }
 
-    return AnimatedCircularChart(
-     key: _chartKey,
-      size: Size(300.0, 300.0),
-      initialChartData: [CircularStackEntry(pieData)],
-      chartType: CircularChartType.Pie,
-      percentageValues: true,
-    );
-  }
+  //   return AnimatedCircularChart(
+  //    key: _chartKey,
+  //     size: Size(300.0, 300.0),
+  //     initialChartData: [CircularStackEntry(pieData)],
+  //     chartType: CircularChartType.Pie,
+  //     percentageValues: true,
+  //   );
+  // }
 
    Widget pieCharts(Map<String, double> colorDetail,
       Map<String, String> colorVal, List<String> colors) {
@@ -229,19 +229,19 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
 
-  void _changePieData(Map<String, double> colorDetail,
-      Map<String, String> colorVal, List<String> colors){
-        List<CircularSegmentEntry> pieData = List<CircularSegmentEntry>();
-    for (var item in colors) {
-      var result = colorDetail[item] * 100;
-      var myInt = int.parse("0xFF${colorVal[item].substring(1)}");
-      pieData.add(CircularSegmentEntry(result, Color(myInt)));
-    }
-    setState(() {
-      print([CircularStackEntry(pieData)].first.entries);
-    _chartKey.currentState.updateData([CircularStackEntry(pieData)]);
-  });
-  }
+  // void _changePieData(Map<String, double> colorDetail,
+  //     Map<String, String> colorVal, List<String> colors){
+  //       List<CircularSegmentEntry> pieData = List<CircularSegmentEntry>();
+  //   for (var item in colors) {
+  //     var result = colorDetail[item] * 100;
+  //     var myInt = int.parse("0xFF${colorVal[item].substring(1)}");
+  //     pieData.add(CircularSegmentEntry(result, Color(myInt)));
+  //   }
+  //   setState(() {
+  //     print([CircularStackEntry(pieData)].first.entries);
+  //   _chartKey.currentState.updateData([CircularStackEntry(pieData)]);
+  // });
+  // }
 
   Widget defectsDetail(Map<String,String> data,List<String> totalDefects) {
     // num _defectVal =0;

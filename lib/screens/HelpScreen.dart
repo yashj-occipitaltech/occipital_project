@@ -4,8 +4,6 @@ import 'package:occipital_tech/util/widgets.dart';
 
 
 class HelpScreen extends StatelessWidget {
-
- //final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(

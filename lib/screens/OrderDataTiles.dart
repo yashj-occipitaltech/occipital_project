@@ -6,7 +6,6 @@ import 'package:occipital_tech/models/order_status_check.dart';
 import 'package:occipital_tech/models/order_status_result.dart';
 import 'package:occipital_tech/screens/OrderResultScreen.dart';
 import 'package:occipital_tech/util/ApiClient.dart';
-import 'package:occipital_tech/util/colorValues.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

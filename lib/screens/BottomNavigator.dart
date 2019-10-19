@@ -1,19 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:occipital_tech/main.dart';
 import 'package:occipital_tech/screens/CommodityForm.dart';
-import 'package:occipital_tech/screens/ContactScreen.dart';
 import 'package:occipital_tech/screens/DemoVideoScreen.dart';
-import 'package:occipital_tech/screens/HelpScreen.dart';
 import 'package:occipital_tech/screens/PreviousData.dart';
 import 'package:occipital_tech/screens/RecentOrdersScreen.dart';
-import 'package:occipital_tech/screens/SettingsScreen.dart';
-import 'package:occipital_tech/util/AppDrawer.dart';
-import 'package:occipital_tech/util/widgets.dart';
-import 'package:occipital_tech/util/colorValues.dart';
 
 class BottomNavigator extends StatefulWidget {
   final bool showHome;
-  BottomNavigator({this.showHome=false});
+  BottomNavigator({this.showHome = false});
   @override
   _BottomNavigatorState createState() => _BottomNavigatorState();
 }
@@ -31,18 +24,15 @@ class _BottomNavigatorState extends State<BottomNavigator> {
     });
   }
 
-  void initState(){
+  void initState() {
     super.initState();
-   
+    if (widget.showHome) setAppBarTitle('Home');
   }
 
   @override
   Widget build(BuildContext context) {
-    print(widget.showHome);
-    if(widget.showHome) setAppBarTitle('Home');
     return Scaffold(
-        floatingActionButtonLocation:
-            FloatingActionButtonLocation.centerDocked,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: FloatingActionButton(
           backgroundColor: Color(0XFF01AF51),
           onPressed: () => Navigator.push(
