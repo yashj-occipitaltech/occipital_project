@@ -53,6 +53,7 @@ dependencies:
   geocoder: ^0.2.1
   location_permissions: ^2.0.3
   share_extend: ^1.0.9
+  flutter_email_sender: ^2.0.3
 
   
   

@@ -5,6 +5,7 @@ import 'package:occipital_tech/models/orders_data.dart';
 import 'package:occipital_tech/screens/OrderDataTiles.dart';
 import 'package:occipital_tech/screens/OrderResultScreen.dart';
 import 'package:occipital_tech/util/ApiClient.dart';
+import 'package:occipital_tech/util/AppDrawer.dart';
 import 'package:occipital_tech/util/widgets.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,10 +18,10 @@ class PreviousData extends StatefulWidget {
 }
 
 class _PreviousDataState extends State<PreviousData> {
-  String _defaultYear = "2019";
   final now = DateTime.now();
   String _defaultMonth = DateFormat("MMMM").format(DateTime.now()).toString();
-  
+  String _defaultYear = DateTime.now().year.toString();
+
 
   Map<String, String> mappedVAL = {
     "January": "01",
@@ -51,9 +52,15 @@ class _PreviousDataState extends State<PreviousData> {
     "November",
     "December"
   ];
-  List<String> years = ["2018", "2019", "2020"];
+  List<String> years = ["2018"];
 
   BehaviorSubject orders = BehaviorSubject();
+
+  void addYears(){
+    for(int i = 0 ; i<10;i++){
+      years.add('${now.year+i}');
+    }
+  }
 
   void dispose() {
     super.dispose();
@@ -63,6 +70,7 @@ class _PreviousDataState extends State<PreviousData> {
   void initState() {
     super.initState();
     _getOrders();
+     addYears();
   }
 
   _getOrders() async {
@@ -81,7 +89,19 @@ class _PreviousDataState extends State<PreviousData> {
 
   @override
   Widget build(BuildContext context) {
+   
     return Scaffold(
+      appBar: AppBar(
+          iconTheme: IconThemeData(color: Colors.black),
+          elevation: 0.0,
+          title: Text(
+            'See Previous Detail',
+            style: TextStyle(color: Colors.black),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.white,
+        ),
+        drawer: AppDrawer(),
         body: Column(
       children: <Widget>[
         Padding(

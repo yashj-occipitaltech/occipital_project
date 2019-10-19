@@ -43,29 +43,32 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant(
-      builder: (context, child, UserModel model) => Scaffold(
-        appBar: Widgets.appBar('Sign Up'),
-        resizeToAvoidBottomInset: true,
-        bottomNavigationBar: submitButton(context, model),
-        body: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Widgets.labelText('User Name'),
-                  usernameInput(),
-                  SizedBox(
-                    height: 10.0,
-                  ),
-                  Widgets.labelText('Type of User'),
-                  userOptions(),
-                  selectedUser == 2 || selectedUser == 3
-                      ? showOtherInputs()
-                      : Container()
-                ],
+      builder: (context, child, UserModel model) => WillPopScope(
+              onWillPop:() => routePopAllowed(model),
+              child: Scaffold(
+          appBar: Widgets.appBar('Sign Up'),
+          resizeToAvoidBottomInset: true,
+          bottomNavigationBar: submitButton(context, model),
+          body: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Widgets.labelText('User Name'),
+                    usernameInput(),
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    Widgets.labelText('Type of User'),
+                    userOptions(),
+                    selectedUser == 2 || selectedUser == 3
+                        ? showOtherInputs()
+                        : Container()
+                  ],
+                ),
               ),
             ),
           ),
@@ -243,7 +246,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           now.year.toString()));
 
       if (data['success'] == true && data['message'] == 'True') {
+         Navigator.of(context).pop();
         Fluttertoast.showToast(msg: 'Successful');
+        Navigator.of(context).popUntil((route) => route.isFirst);
         Navigator.pushReplacementNamed(context, '/home');
       } else if (data['resultCode'] == ResultCodes.jsonError) {
         Fluttertoast.showToast(msg: 'Some error occured.Please try again');
@@ -268,5 +273,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
       print(data['verified']);
       print(data['status']);
     }
+  }
+
+
+  Future<bool> routePopAllowed(UserModel model)async{
+      if(model.isLoading){
+        return false;
+      }
+
+      return true;
   }
 }

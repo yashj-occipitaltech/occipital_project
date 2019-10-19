@@ -12,6 +12,8 @@ import 'package:occipital_tech/util/widgets.dart';
 import 'package:occipital_tech/util/colorValues.dart';
 
 class BottomNavigator extends StatefulWidget {
+  final bool showHome;
+  BottomNavigator({this.showHome=false});
   @override
   _BottomNavigatorState createState() => _BottomNavigatorState();
 }
@@ -29,14 +31,16 @@ class _BottomNavigatorState extends State<BottomNavigator> {
     });
   }
 
+  void initState(){
+    super.initState();
+   
+  }
+
   @override
   Widget build(BuildContext context) {
+    print(widget.showHome);
+    if(widget.showHome) setAppBarTitle('Home');
     return Scaffold(
-        appBar: appBarTitle == "Home"
-            ? null
-            : Widgets.appBar(appBarTitle,
-               showLeading: false ),
-        drawer: AppDrawer(),
         floatingActionButtonLocation:
             FloatingActionButtonLocation.centerDocked,
         floatingActionButton: FloatingActionButton(
@@ -98,22 +102,5 @@ class _BottomNavigatorState extends State<BottomNavigator> {
         body: appBarTitle == 'Home'
             ? RecentOrdersScreen()
             : _children[_currentIndex]);
-  }
-
-  Widget drawerTiles(String name, Widget screen, IconData iconName) {
-    return ListTile(
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Icon(iconName),
-          SizedBox(
-            width: 10.0,
-          ),
-          Text(name)
-        ],
-      ),
-      onTap: () => Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => screen)),
-    );
   }
 }

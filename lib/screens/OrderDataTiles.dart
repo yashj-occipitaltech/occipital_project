@@ -52,15 +52,17 @@ class _OrderDataTilesState extends State<OrderDataTiles> {
 
   void initState() {
     super.initState();
-    if (widget.index == 0 && widget.recentOrderId != null) {
-      timer = Timer.periodic(Duration(seconds: 20), (timer) {
-        if (recentOrderStatus.value == 'Completed') {
-          cancelTimer();
-        } else {
-          checkStatus(widget.orderId);
-        }
-      });
-    }
+    if (widget.status != 'Completed') {
+      if (widget.index == 0 && widget.recentOrderId != null) {
+        timer = Timer.periodic(Duration(seconds: 20), (timer) {
+          if (recentOrderStatus.value == 'Completed') {
+            cancelTimer();
+          } else {
+            checkStatus(widget.orderId);
+          }
+        });
+      }
+    } else {}
   }
 
   cancelTimer() {
@@ -70,21 +72,34 @@ class _OrderDataTilesState extends State<OrderDataTiles> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Object>(
-      stream: recentOrderStatus,
-      builder: (context, snapshot) {
-        return InkWell(
-            onTap: () {
-                widget.status == 'Completed'
-                    ? Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                OrderResultScreen(widget.orderId)))
-                    : Fluttertoast.showToast(msg: 'Still Processing');
-            },
-            child: cardUi());
-      }
-    );
+        stream: recentOrderStatus,
+        builder: (context, snapshot) {
+          return InkWell(
+              onTap: () {
+                if (widget.index == 0 &&
+                    widget.recentOrderId != null &&
+                    widget.status != 'Completed') {
+                  if (snapshot.hasData) {
+                    if (snapshot.data == 'Completed') {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  OrderResultScreen(widget.orderId)));
+                    } else {
+                      Fluttertoast.showToast(msg: 'Still Processing');
+                    }
+                  }
+                } else if (widget.status == 'Completed') {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              OrderResultScreen(widget.orderId)));
+                }
+              },
+              child: cardUi());
+        });
   }
 
   Widget cardUi() {
@@ -137,7 +152,9 @@ class _OrderDataTilesState extends State<OrderDataTiles> {
               ],
             ),
           ),
-          widget.index == 0 && widget.recentOrderId != null
+          widget.index == 0 &&
+                  widget.recentOrderId != null &&
+                  widget.status != 'Completed'
               ? streamStatus()
               : statusChip(widget.status)
         ],
@@ -250,8 +267,6 @@ class _OrderDataTilesState extends State<OrderDataTiles> {
   }
 
   Color getColorForStatus(String status) {
-    // print('---->');
-    // print(status);
     switch (status) {
       case 'Error':
         return Colors.red;

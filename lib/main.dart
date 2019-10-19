@@ -82,7 +82,9 @@ class _MyAppState extends State<MyApp> {
               '/signup': (context) => SignUpScreen(),
               '/loginotp': (context) => LoginOTPScreen()
             },
-            title: 'Flutter Demo',
+            title: 'Agrograde',
+            // darkTheme: ThemeData.dark(),
+            // themeMode: ThemeMode.dark,
             theme: ThemeData(
               primarySwatch: Colors.green,
 

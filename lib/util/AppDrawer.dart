@@ -4,6 +4,7 @@ import 'package:occipital_tech/scoped_models/user_model.dart';
 import 'package:occipital_tech/screens/BottomNavigator.dart';
 import 'package:occipital_tech/screens/ContactScreen.dart';
 import 'package:occipital_tech/screens/HelpScreen.dart';
+import 'package:occipital_tech/screens/RecentOrdersScreen.dart';
 import 'package:occipital_tech/screens/SettingsScreen.dart';
 import 'package:occipital_tech/util/locator.dart';
 import 'package:occipital_tech/util/colorValues.dart';
@@ -31,7 +32,7 @@ class _AppDrawerState extends State<AppDrawer> {
                         image: ExactAssetImage('assets/home_logo.png'),
                         fit: BoxFit.fitWidth)),
               ),
-              drawerTiles('Home', BottomNavigator(), Icons.home),
+              drawerTiles('Home', BottomNavigator(showHome: true,), Icons.home),
               drawerTiles('Settings', SettingsScreen(), Icons.settings),
               drawerTiles('Help', HelpScreen(), Icons.help),
               drawerTiles('Contact us', ContactScreen(), Icons.phone),
@@ -81,14 +82,16 @@ class _AppDrawerState extends State<AppDrawer> {
           )
         ],
       ),
-      onTap: () => name == 'Home' ? homeRoute() : Navigator.push(
+      onTap: () => name == 'Home' ? homeRoute(true) : Navigator.push(
           context, MaterialPageRoute(builder: (context) => screen)),
     );
   }
 
-  void homeRoute(){
+  void homeRoute(bool homeVal){
      Navigator.of(context).popUntil((route) => route.isFirst);
      Navigator.of(context).pop();
+     Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => BottomNavigator(showHome: homeVal,)));
   }
 
   void _showDialog() {
@@ -102,11 +105,16 @@ class _AppDrawerState extends State<AppDrawer> {
               FlatButton(
                 child: Text('Yes'),
                 onPressed: () {
+                  //Dont touch this piece of code , it works 
+                  Navigator.of(context).pop();
                   locator<UserModel>().logout();
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  Navigator.pushReplacementNamed(context, '/loginotp');
+                  
                   Fluttertoast.showToast(
                     msg: 'Successfully logged out',
                   );
-                  Navigator.pushReplacementNamed(context, '/loginotp');
+                 
                 },
               ),
               FlatButton(

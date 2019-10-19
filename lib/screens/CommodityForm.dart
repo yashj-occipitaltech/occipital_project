@@ -54,7 +54,7 @@ class _CommodityFormState extends State<CommodityForm> {
     progressValue.close();
   }
 
-  Future<bool> getCompressionSetting()async{
+  Future<bool> getCompressionSetting() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool('compression');
   }
@@ -80,11 +80,11 @@ class _CommodityFormState extends State<CommodityForm> {
     if (selected != null) {
       File croppedImage = await _cropImage(selected);
       _images.add(croppedImage ?? selected);
-      final compressionVal = await getCompressionSetting() ;
-      if(compressionVal==true){
-         var result = await FlutterImageCompress.compressAndGetFile(
-          (croppedImage ?? selected).path, (croppedImage ?? selected).path,
-          quality: 60, minWidth: 2000, minHeight: 2000);
+      final compressionVal = await getCompressionSetting();
+      if (compressionVal == true) {
+        var result = await FlutterImageCompress.compressAndGetFile(
+            (croppedImage ?? selected).path, (croppedImage ?? selected).path,
+            quality: 60, minWidth: 2000, minHeight: 2000);
       }
       // print(result.lengthSync());
       images.add(_images);
@@ -114,13 +114,18 @@ class _CommodityFormState extends State<CommodityForm> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('UPLOAD ORDER',style:TextStyle(color: Colors.white,fontSize: 16.0)),
-            SizedBox(width:5.0),
-            Icon(Icons.check_circle,color: Colors.white,size: 20.0,)
+            Text('UPLOAD ORDER',
+                style: TextStyle(color: Colors.white, fontSize: 16.0)),
+            SizedBox(width: 5.0),
+            Icon(
+              Icons.check_circle,
+              color: Colors.white,
+              size: 20.0,
+            )
           ],
         ),
         padding: EdgeInsets.all(16.0),
-        onPressed: ()async=>_onFormSubmmited(),
+        onPressed: () async => _onFormSubmmited(),
       ),
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.black),
@@ -131,7 +136,7 @@ class _CommodityFormState extends State<CommodityForm> {
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
-        
+
         // actions: <Widget>[
         //   Padding(
         //     padding: EdgeInsets.all(10.0),
@@ -180,25 +185,15 @@ class _CommodityFormState extends State<CommodityForm> {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
 
       final permission = await Geolocator().checkGeolocationPermissionStatus();
-      ServiceStatus serviceStatus = await LocationPermissions().checkServiceStatus();
-      print(serviceStatus);
-      print(permission);
+      ServiceStatus serviceStatus =
+          await LocationPermissions().checkServiceStatus();
       if (permission == GeolocationStatus.denied ||
           permission == GeolocationStatus.disabled) {
-        print('I am hrer');
-      await LocationPermissions().requestPermissions();
-      }else if(serviceStatus==ServiceStatus.disabled){
-        Fluttertoast.showToast(msg: 'Please enable location');
         await LocationPermissions().requestPermissions();
-      } 
-      
-      else if(permission==GeolocationStatus.granted&&serviceStatus==ServiceStatus.enabled) {
-        Position position = await Geolocator()
-            .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-        final coordinates =
-            new Coordinates(position.latitude, position.longitude);
-        final addresses =
-            await Geocoder.local.findAddressesFromCoordinates(coordinates);
+      } else if (serviceStatus == ServiceStatus.disabled) {
+        Fluttertoast.showToast(msg: 'Please enable location');
+      } else if (permission == GeolocationStatus.granted &&
+          serviceStatus == ServiceStatus.enabled) {
         await uploadImages(
             UploadOrder(
                 prefs.getString('phoneNo'),
@@ -206,16 +201,24 @@ class _CommodityFormState extends State<CommodityForm> {
                 now.day.toString(),
                 now.month.toString(),
                 now.year.toString(),
-                "${addresses.first.featureName}",
+                await getAddress().then((data) => data.first.featureName),
                 _value,
                 prefs.getString('userType'),
                 prefs.getString('token'),
                 _description,
-                addresses.first.addressLine
-                ),
+                await getAddress().then((data) => data.first.addressLine)),
             _images);
       }
     }
+  }
+
+  Future<List<Address>> getAddress() async {
+    Position position = await Geolocator()
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    final coordinates = Coordinates(position.latitude, position.longitude);
+    final addresses =
+        await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    return addresses;
   }
 
   DropdownButton _itemDown() => DropdownButton<String>(
@@ -392,7 +395,8 @@ class _CommodityFormState extends State<CommodityForm> {
           FileItem(
               filename: image.path.split('/').last,
               fieldname: 'uploads',
-              savedDir: '${dir.path.split('/').take(5).join('/').substring(1)}/cache')
+              savedDir:
+                  '${dir.path.split('/').take(5).join('/').substring(1)}/cache')
       ],
       data: order.toJson().cast<String, String>(),
     );

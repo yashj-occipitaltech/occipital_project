@@ -321,8 +321,8 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
 
   _onButtonPressed(FirebaseUser user) async {
     setState(() {
-      isLoadingDialog = true;
-      checkingUser = true;
+      // isLoadingDialog = f;
+      // checkingUser = true;
     });
     final userVerified = await signIn();
 
@@ -333,6 +333,7 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
         model.storePhoneNo(phoneNo.substring(3));
         final response = await model.checkUser(UserCheck(phoneNo.substring(3)));
         if (response['success'] == 'True') {
+          Navigator.of(context).pop();
           Navigator.pushNamed(context, '/signup');
         } else if (response['success'] == 'Error' ||
             response['resultCode'] == 2) {
@@ -343,7 +344,8 @@ class _LoginOTPScreenState extends State<LoginOTPScreen> {
           Navigator.of(context).pop();
           Fluttertoast.showToast(msg: 'Some error occured.Please try again');
         } else {
-          // Navigator.of(context).popUntil((route) => route.isFirst);
+          Navigator.of(context).pop();
+          Navigator.of(context).popUntil((route) => route.isFirst);
           Navigator.of(context).pushReplacementNamed('/home');
         }
       }

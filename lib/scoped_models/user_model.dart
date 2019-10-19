@@ -157,6 +157,7 @@ class UserModel extends Model {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     prefs.remove('token');
+    prefs.setString('token', null);
     prefs.setString('userType', null);
     prefs.setString('phoneNo', null);
     prefs.setString('token', null);
