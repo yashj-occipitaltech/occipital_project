@@ -8,6 +8,7 @@ class ApiEndpoints{
   static const checkOrderStatus = "/checkStatus";
   static const getOrderData = "/getOrderData";
   static const getLastSomeOrders = "/getLastSomeOrders";
+  static const videolink = "/videolink";
 
 }
 

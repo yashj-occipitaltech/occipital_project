@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +11,7 @@ import 'package:rxdart/subjects.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:share_extend/share_extend.dart';
+import 'package:sticky_headers/sticky_headers/widget.dart';
 
 class OrderResultScreen extends StatefulWidget {
   final String orderId;
@@ -109,8 +109,9 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
                                 "${dir.path}/${orderData.value.orderId}.pdf");
                             print(await pdfFile.exists());
                             if (await pdfFile.exists()) {
-                             
-                              ShareExtend.share("${dir.path}/${orderData.value.orderId}.pdf", "file");
+                              ShareExtend.share(
+                                  "${dir.path}/${orderData.value.orderId}.pdf",
+                                  "file");
                             } else {
                               await downloadFile(data.pdfPath).then((dat) {
                                 ShareExtend.share(fileUrl, "file");
@@ -152,7 +153,7 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
               height: MediaQuery.of(context).size.height * 0.07,
               child: Row(
                 children: <Widget>[
-                  Center(child: CircularProgressIndicator()),
+                  // Center(child: CircularProgressIndicator()),
                   SizedBox(
                     width: 10.0,
                   ),
@@ -185,53 +186,125 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               final order = snapshot.data as GetOrderData;
-              print(order.toJson());
+              // print(order.toJson());
               return ListView(
-                padding: EdgeInsets.all(16.0),
                 children: <Widget>[
-                  header(
-                      order.city ?? 'N/A',
-                      '${order.date ?? 'N/A'}-${order.month ?? 'NA'}-${order.year ?? 'N/A'}',
-                      order.time ?? 'N/A',
-                      order.ordernumber.toString() ?? 'N/A'),
-                  SizedBox(height: 15.0),
-                  Text('Average Details of All Images'),
-                  SizedBox(height: 15.0),
-                  sizeTable(order.range, order.frequencyArray),
-                  SizedBox(height: 5.0),
-                  Center(
-                      child: Text(
-                    '*Scroll for more data',
-                    style: TextStyle(color: Colors.grey),
-                  )),
-                  // SizedBox(height: 5.0),
-                  order.colorDetails == null
-                      ? Center(
-                          child: Text('No data available'),
-                        )
-                      : pieCharts(
-                          order.colorDetails, order.colorRGB, order.colors),
-                  //SizedBox(height: 15.0),
-                  FlatButton(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0)),
-                    padding: EdgeInsets.all(16.0),
-                    color: Color(0XFF01AF51),
-                    child: Text(
-                      'Order Detail',
-                      style: TextStyle(color: Colors.white, fontSize: 16.0),
+                  StickyHeader(
+                    header: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    OrderDetailScreen(order)));
+                      },
+                      child: Container(
+                        height: 50.0,
+                        color: Color(0XFF01AF51),
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'View Advanced Order Detail',
+                          style: TextStyle(color: Colors.white,fontSize: 16.0),
+                        ),
+                      ),
                     ),
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => OrderDetailScreen(order)));
-                    },
+                    content: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Column(
+                        children: <Widget>[
+                          header(
+                              order.city ?? 'N/A',
+                              '${order.date ?? 'N/A'}-${order.month ?? 'NA'}-${order.year ?? 'N/A'}',
+                              order.time ?? 'N/A',
+                              order.ordernumber.toString() ?? 'N/A'),
+                          SizedBox(height: 15.0),
+                          Text('Average Details of All Images'),
+                          SizedBox(height: 15.0),
+                          sizeTable(order.range, order.frequencyArray),
+                          SizedBox(height: 5.0),
+                          Center(
+                              child: Text(
+                            '*Scroll for more data',
+                            style: TextStyle(color: Colors.grey),
+                          )),
+                          // SizedBox(height: 5.0),
+                          order.colorDetails == null
+                              ? Center(
+                                  child: Text('No data available'),
+                                )
+                              : pieCharts(order.colorDetails, order.colorRGB,
+                                  order.colors),
+                          //SizedBox(height: 15.0),
+                          // FlatButton(
+                          //   shape: RoundedRectangleBorder(
+                          //       borderRadius: BorderRadius.circular(30.0)),
+                          //   padding: EdgeInsets.all(16.0),
+                          //   color: Color(0XFF01AF51),
+                          //   child: Text(
+                          //     'Order Detail',
+                          //     style: TextStyle(
+                          //         color: Colors.white, fontSize: 16.0),
+                          //   ),
+                          //   onPressed: () {
+                          //     Navigator.push(
+                          //         context,
+                          //         MaterialPageRoute(
+                          //             builder: (context) =>
+                          //                 OrderDetailScreen(order)));
+                          //   },
+                          // ),
+                          SizedBox(
+                            height: 15.0,
+                          ),
+                          defectsCard(order.defects, order.totalDefects)
+                        ],
+                      ),
+                    ),
                   ),
-                  SizedBox(
-                    height: 15.0,
-                  ),
-                  defectsCard(order.defects, order.totalDefects)
+                  // header(
+                  //     order.city ?? 'N/A',
+                  //     '${order.date ?? 'N/A'}-${order.month ?? 'NA'}-${order.year ?? 'N/A'}',
+                  //     order.time ?? 'N/A',
+                  //     order.ordernumber.toString() ?? 'N/A'),
+                  // SizedBox(height: 15.0),
+                  // Text('Average Details of All Images'),
+                  // SizedBox(height: 15.0),
+                  // sizeTable(order.range, order.frequencyArray),
+                  // SizedBox(height: 5.0),
+                  // Center(
+                  //     child: Text(
+                  //   '*Scroll for more data',
+                  //   style: TextStyle(color: Colors.grey),
+                  // )),
+                  // // SizedBox(height: 5.0),
+                  // order.colorDetails == null
+                  //     ? Center(
+                  //         child: Text('No data available'),
+                  //       )
+                  //     : pieCharts(
+                  //         order.colorDetails, order.colorRGB, order.colors),
+                  // //SizedBox(height: 15.0),
+                  // FlatButton(
+                  //   shape: RoundedRectangleBorder(
+                  //       borderRadius: BorderRadius.circular(30.0)),
+                  //   padding: EdgeInsets.all(16.0),
+                  //   color: Color(0XFF01AF51),
+                  //   child: Text(
+                  //     'Order Detail',
+                  //     style: TextStyle(color: Colors.white, fontSize: 16.0),
+                  //   ),
+                  //   onPressed: () {
+                  //     Navigator.push(
+                  //         context,
+                  //         MaterialPageRoute(
+                  //             builder: (context) => OrderDetailScreen(order)));
+                  //   },
+                  // ),
+                  // SizedBox(
+                  //   height: 15.0,
+                  // ),
+                  // defectsCard(order.defects, order.totalDefects)
                 ],
               );
             } else if (snapshot.hasError) {
@@ -461,7 +534,7 @@ class _OrderResultScreenState extends State<OrderResultScreen> {
 
   Widget defectsCard(
       List<Map<String, String>> data, List<String> totalDefects) {
-    num _defectVal;
+   // num _defectVal;
     // for (var item in totalDefects) {
     //  _defectVal =
     //       (data.map((m) => num.parse(m[item])).reduce((a, b) => a + b) / data.length) *

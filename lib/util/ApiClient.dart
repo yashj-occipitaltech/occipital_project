@@ -13,7 +13,7 @@ import 'package:occipital_tech/models/user_check.dart';
 import 'package:occipital_tech/models/user_check_status.dart';
 import 'package:occipital_tech/models/verify_trader.dart';
 import 'package:occipital_tech/util/consts.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiClient {
   static Future<UserCheckStatus> checkUser(UserCheck user) async {
@@ -50,15 +50,11 @@ class ApiClient {
     return OrdersData.fromJson(json.decode(response.body));
   }
 
-  
-
   static Future<OrderStatusResult> checkStatus(
       OrderStatusCheck orderStatus) async {
     final response = await http.post(
         ApiEndpoints.baseUrl + ApiEndpoints.checkOrderStatus,
         body: json.encode(orderStatus));
-
-   
 
     return OrderStatusResult.fromJson(json.decode(response.body));
   }
@@ -82,5 +78,14 @@ class ApiClient {
     print(response.body.toString());
 
     return OrdersData.fromJson(json.decode(response.body));
+  }
+
+  static Future<String> getVideoLink() async {
+    final prefs = await SharedPreferences.getInstance();
+    final response = await http.post(
+        ApiEndpoints.baseUrl + ApiEndpoints.videolink,
+        body: json.encode({"Token": prefs.getString('token')}));
+
+    return json.decode(response.body)['URL'];
   }
 }

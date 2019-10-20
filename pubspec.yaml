@@ -50,6 +50,8 @@ dependencies:
   location_permissions: ^2.0.3
   share_extend: ^1.0.9
   flutter_email_sender: ^2.0.3
+  youtube_player_flutter: ^5.0.0+1
+  sticky_headers: "^0.1.8"
 
   
   
